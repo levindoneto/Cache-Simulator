@@ -1,0 +1,5 @@
+line size = 64
+number of lines = 512
+associativity = 8
+replacement policy = LRU
+write policy = WRITEBACK
