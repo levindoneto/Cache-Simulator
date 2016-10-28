@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Cache-Simulator
-O simulador de cache serve para simular as substituições que são feitas na memória.
-=======
 # Cache-Simulator 
 
 The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write policies (Writethrough and Writeback).
@@ -19,4 +15,3 @@ The cache simulator is used to simulate substitutions using replacement policies
 * Number of write misses
 * Number of read hits
 * Number of read misses
->>>>>>> e9496db136523d7999627afc4f50898cc8a8f0b2
