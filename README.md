@@ -15,3 +15,12 @@ The cache simulator is used to simulate substitutions using replacement policies
 * Number of write misses
 * Number of read hits
 * Number of read misses
+
+## How to use
+```Makefile
+make all
+```
+
+```Terminal
+./243685 "cachedesc.bin"
+```
