@@ -6,7 +6,10 @@ int main(int argc, char **argv) // File is passed by a parameter
     int associativity;          // Number of blocks per set
     char replacement_policy[5]; // LRY or FIFO + \0
     char write_policy[13];      // WRITEBACK or WRITETHROUGH + \0
-   
+    
+    int c;
+    int tes=0;
+
     printf("\n*** Cache Simulator ***\n");
     
     char *input = argv[1];
@@ -15,10 +18,16 @@ int main(int argc, char **argv) // File is passed by a parameter
     
     if(!ptr_file_specs_cache) {
         printf("This file is unable to open!");
+
         return -1;
     }
     else {                      // File can be opened 
-        printf("File can be parsed!");
+        while( (c=fgetc(ptr_file_specs_cache)) != EOF ) {        
+            printf("palmeiras\n");
+            printf("%c", c);
+            tes++;
+        }
+
     }
 
     fclose(ptr_file_specs_cache);

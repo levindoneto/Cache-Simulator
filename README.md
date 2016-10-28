@@ -20,7 +20,6 @@ The cache simulator is used to simulate substitutions using replacement policies
 ```Makefile
 make all
 ```
-
 ```Terminal
 ./243685 "cachedesc.bin"
 ```
