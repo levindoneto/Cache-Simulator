@@ -1,10 +1,6 @@
 #include <stdio.h>
-
-
-int main() {
-
-	printf("teste");
-
-
-return 0;
-}
+int main()  
+{      
+   printf("Cache Simulator\n");     
+   return 0;
+}  
