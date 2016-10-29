@@ -1,6 +1,6 @@
 # Cache-Simulator 
 
-The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write policies (Writethrough and Writeback).
+The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write back with write allocate policy. The words (blocks/lines) have 1B.
 
 ## Specification file content (input)
 * Block size (unsigned power 2)
@@ -17,9 +17,7 @@ The cache simulator is used to simulate substitutions using replacement policies
 * Number of read misses
 
 ## How to use
-```Makefile
-make all
-```
 ```Terminal
+make all
 ./243685 "cachedesc.bin"
 ```
