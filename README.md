@@ -18,5 +18,5 @@ The cache simulator is used to simulate substitutions using replacement policies
 ## How to use
 ```Terminal
 make all
-./243685 "cachedesc.bin"
+./243685 "cachedesc.bin" "input.bin"
 ```
