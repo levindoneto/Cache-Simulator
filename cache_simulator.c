@@ -9,15 +9,26 @@ int main(int argc, char **argv)  // Files are passed by a parameter
         int associativity;           // Number of blocks per set
         char replacement_policy[5];  // LRY or FIFO + \0
     } Desc;
-    
-    Desc cache_description;
 
+    typedef struct result {
+        int acess_count;
+        int read_hits;
+        int read_misses;
+        int write_hits;
+        int write_misses;
+    } Results;
+    
+    Desc   cache_description;
+    Results cache_results;
+    
     printf("\n*** Cache Simulator ***\n");
     
     char *description = argv[1];
     char *input = argv[2];
+    char output[11] = "output.out";
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
+    FILE *ptr_file_output;
     
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -25,7 +36,7 @@ int main(int argc, char **argv)  // Files are passed by a parameter
         return -1;
     }
     else {
-        printf("TO DO");
+        printf("\nTO DO\n");
     }
     
     ptr_file_specs_cache = fopen(description, "rb");
@@ -45,9 +56,21 @@ int main(int argc, char **argv)  // Files are passed by a parameter
     printf("%d\n", cache_description.line_size);
     printf("%d\n", cache_description.number_of_lines);
     printf("%d\n", cache_description.associativity);
-    printf("%s\n", cache_description.replacement_policy);
-                                    
-    fclose(ptr_file_specs_cache);     // Close de cache description file
+    printf("%s\n\n", cache_description.replacement_policy);
+    
+    ptr_file_output = fopen("output.out", "wb");
+    
+    if (!ptr_file_output) {
+        printf("\nThe file of output can't be writed\n\n");
+        return -1;
+    }
+    else {
+        printf("\nTO DO\n");
+    }
+    
+    fclose(ptr_file_specs_cache);     // Close the cache description file
+    fclose(ptr_file_input);           // Close the input file (trace file)
+    fclose(ptr_file_output);          // Close the output file (results)
 
    return 0;
 }  

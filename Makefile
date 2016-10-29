@@ -7,4 +7,4 @@ all: 243685.o
 	gcc -o 243685 cache_simulator.c
 
 clean:
-	rm -rf *.o *~ 243685 # Remove the .o and the executable
+	rm -rf *.o *~ *.out 243685 # Remove the .o and the executable
