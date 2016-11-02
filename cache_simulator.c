@@ -3,6 +3,7 @@
 #include "cache_simulator.h"
 #include <stdlib.h>
 #include <string.h>
+#define DEBUG 0    // 0: FALSE, 1:TRUE
 
 // Prototype of used functions
 void generate_output(Results cache_results);
@@ -62,10 +63,13 @@ int main(int argc, char **argv)      // Files are passed by a parameter
         fscanf(ptr_file_specs_cache, "replacement policy = %s\n", cache_description.replacement_policy);
     }
 
+    // DEBUG prints
+    #if DEBUG == 1
     printf("%d\n",   cache_description.line_size);
     printf("%d\n",   cache_description.number_of_lines);
     printf("%d\n",   cache_description.associativity);
     printf("%s\n\n", cache_description.replacement_policy);
+    #endif
 
     // write(cache_results.things)
     generate_output(cache_results);

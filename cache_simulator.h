@@ -1,6 +1,5 @@
 // Libraries
 #include <stdio.h>
-#include "cache_simulator.h"
 #include <stdlib.h>
 #include <string.h>
 
