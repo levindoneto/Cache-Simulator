@@ -4,9 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 #define DEBUG 0    // 0: FALSE, 1:TRUE
+#define TAM_WORD 1 // All words with 1 Byte
 
 // Prototype of used functions
 void generate_output(Results cache_results);
+int make_line(int words_per_line, int bytes_per_word);
+int make_index(int number_of_lines_of_cache, int associativity);
+int make_tag(int number_of_lines_of_cache, int associativity);
 
 void generate_output(Results cache_results){
     FILE *ptr_file_output;
