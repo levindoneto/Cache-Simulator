@@ -48,6 +48,8 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     FILE *ptr_file_output;
     int address;                // Address passed by the CPU
     char RorW;                  // Read or Write (address)
+    int number_of_reads = 0;    // Number of read request operations by the CPU
+    int number_of_writes = 0;   // Number of write request operations by the CPU
 
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -57,7 +59,22 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     else {
         while (fscanf(ptr_file_input, "%d %c\n", &address, &RorW) != EOF){
             cache_results.acess_count++;
+            if (RorW == 'R') {
+                number_of_reads++;
+                //read(...);
+            }
+            else if (RorW == 'W'){
+                number_of_writes++;
+                //write(...);
+            }
+            else {
+                printf("\nUndefined operation request detected\n");
+
+            }
         }
+        #if DEBUG == 1
+        printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
+        #endif
     }
 
     ptr_file_specs_cache = fopen(description, "rb");
