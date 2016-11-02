@@ -55,7 +55,9 @@ int main(int argc, char **argv)      // Files are passed by a parameter
         return -1;
     }
     else {
-        printf("TO DO")
+        while (fscanf(ptr_file_input, "%d %c\n", &address, &RorW) != EOF){
+            cache_results.acess_count++;
+        }
     }
 
     ptr_file_specs_cache = fopen(description, "rb");
