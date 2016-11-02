@@ -32,6 +32,13 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     Desc   cache_description;
     Results cache_results;
 
+    // Init of results
+    cache_results.acess_count = 0;
+    cache_results.read_hits = 0;
+    cache_results.read_misses = 0;
+    cache_results.write_hits = 0;
+    cache_results.write_misses = 0;
+
     printf("\n*** Cache Simulator ***\n");
 
     char *description = argv[1];
@@ -39,6 +46,8 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
     FILE *ptr_file_output;
+    int address;                // Address passed by the CPU
+    char RorW;                  // Read or Write (address)
 
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -46,7 +55,7 @@ int main(int argc, char **argv)      // Files are passed by a parameter
         return -1;
     }
     else {
-        printf("\nTO DO\n");
+        printf("TO DO")
     }
 
     ptr_file_specs_cache = fopen(description, "rb");
