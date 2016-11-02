@@ -1,7 +1,7 @@
 // Libraries
 #include <stdio.h>
 
-int main(int argc, char **argv)  // Files are passed by a parameter
+int main(int argc, char **argv)      // Files are passed by a parameter
 {   
     typedef struct desc {
         int line_size;               // Block size
@@ -10,7 +10,7 @@ int main(int argc, char **argv)  // Files are passed by a parameter
         char replacement_policy[5];  // LRY or FIFO + \0
     } Desc;
 
-    typedef struct result {
+    typedef struct results {
         int acess_count;
         int read_hits;
         int read_misses;
@@ -32,7 +32,7 @@ int main(int argc, char **argv)  // Files are passed by a parameter
     
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
-        printf("\nhe file of Input is unable to open!\n\n");
+        printf("\nThe file of Input is unable to open!\n\n");
         return -1;
     }
     else {
@@ -53,9 +53,9 @@ int main(int argc, char **argv)  // Files are passed by a parameter
         fscanf(ptr_file_specs_cache, "replacement policy = %s\n", cache_description.replacement_policy);    
     }
     
-    printf("%d\n", cache_description.line_size);
-    printf("%d\n", cache_description.number_of_lines);
-    printf("%d\n", cache_description.associativity);
+    printf("%d\n",   cache_description.line_size);
+    printf("%d\n",   cache_description.number_of_lines);
+    printf("%d\n",   cache_description.associativity);
     printf("%s\n\n", cache_description.replacement_policy);
     
     ptr_file_output = fopen("output.out", "wb");
@@ -65,6 +65,7 @@ int main(int argc, char **argv)  // Files are passed by a parameter
         return -1;
     }
     else {
+        // write(cache_results.things)
         printf("\nTO DO\n");
     }
     
