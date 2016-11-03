@@ -4,14 +4,26 @@
 #include <stdlib.h>
 #include <string.h>
 #define DEBUG 0    // 0: FALSE, 1:TRUE
-#define TAM_WORD 1 // All words with 1 Byte
+#define TAM_WORD 1 // All words with 1 Byte (bytes_per_word)
 
 // Prototype of used functions
 void generate_output(Results cache_results);
-int make_line(int words_per_line, int bytes_per_word);
+int make_line(int address, int words_per_line, int bytes_per_word);
 int make_index(int number_of_lines_of_cache, int associativity);
 int make_tag(int number_of_lines_of_cache, int associativity);
 
+/*
+ * That function get the line (upper) of a given address by the CPU
+ */
+int make_line(int address, int words_per_line, int bytes_per_word) {
+    int line;
+    line = ((address/words_per_line))/bytes_per_word;
+    return line;
+}
+
+/*
+ * That function generates a formated output with the results of cache simulation
+ */
 void generate_output(Results cache_results){
     FILE *ptr_file_output;
     ptr_file_output=fopen("output.out", "wb");
@@ -50,10 +62,42 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
     FILE *ptr_file_output;
-    int address;                // Address passed by the CPU
     char RorW;                  // Read or Write (address)
     int number_of_reads = 0;    // Number of read request operations by the CPU
     int number_of_writes = 0;   // Number of write request operations by the CPU
+    /*Informations of each address*/
+    int address;                // Address passed by the CPU
+    int words_per_line;
+    int number_of_sets;         // number_of_lines/associativity
+    int tag;
+    int index;
+
+    /*********************** Cache Description ********************************/
+    ptr_file_specs_cache = fopen(description, "rb");
+    int desc_line;
+
+    if (!ptr_file_specs_cache) {
+        printf("\nThe file of cache description is unable to open!\n\n");
+        return -1;
+    }
+    else {                            // File can be opened
+        fscanf(ptr_file_specs_cache, "line size = %d\n", &cache_description.line_size);
+        fscanf(ptr_file_specs_cache, "number of lines = %d\n", &cache_description.number_of_lines);
+        fscanf(ptr_file_specs_cache, "associativity = %d\n", &cache_description.associativity);
+        fscanf(ptr_file_specs_cache, "replacement policy = %s\n", cache_description.replacement_policy);
+    }
+
+    // DEBUG prints
+    #if DEBUG == 1
+    printf("%d\n",   cache_description.line_size);
+    printf("%d\n",   cache_description.number_of_lines);
+    printf("%d\n",   cache_description.associativity);
+    printf("%s\n\n", cache_description.replacement_policy);
+    #endif
+    /**************************************************************************/
+
+    /***************** Input Trace File and simulation ************************/
+    words_per_line = cache_description.line_size/8; // 8 is the size of a word in this simulator
 
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -80,32 +124,11 @@ int main(int argc, char **argv)      // Files are passed by a parameter
         printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
         #endif
     }
+    /**************************************************************************/
 
-    ptr_file_specs_cache = fopen(description, "rb");
-    int desc_line;
-
-    if (!ptr_file_specs_cache) {
-        printf("\nThe file of cache description is unable to open!\n\n");
-        return -1;
-    }
-    else {                            // File can be opened
-        fscanf(ptr_file_specs_cache, "line size = %d\n", &cache_description.line_size);
-        fscanf(ptr_file_specs_cache, "number of lines = %d\n", &cache_description.number_of_lines);
-        fscanf(ptr_file_specs_cache, "associativity = %d\n", &cache_description.associativity);
-        fscanf(ptr_file_specs_cache, "replacement policy = %s\n", cache_description.replacement_policy);
-    }
-
-    // DEBUG prints
-    #if DEBUG == 1
-    printf("%d\n",   cache_description.line_size);
-    printf("%d\n",   cache_description.number_of_lines);
-    printf("%d\n",   cache_description.associativity);
-    printf("%s\n\n", cache_description.replacement_policy);
-    #endif
-
-    // write(cache_results.things)
+    /****************************** Output ************************************/
     generate_output(cache_results);
-
+    /**************************************************************************/
 
     fclose(ptr_file_specs_cache);     // Close the cache description file
     fclose(ptr_file_input);           // Close the input file (trace file)
