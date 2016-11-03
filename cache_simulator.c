@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define DEBUG 0    // 0: FALSE, 1:TRUE
-#define TAM_WORD 1 // All words with 1 Byte (bytes_per_word)
+#define BYTES_PER_WORD 1 // All words with 1 Byte (bytes_per_word)
 
 // Prototype of used functions
 void generate_output(Results cache_results);
@@ -69,6 +69,7 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     int address;                // Address passed by the CPU
     int words_per_line;
     int number_of_sets;         // number_of_lines/associativity
+    long int line;
     int tag;
     int index;
 
@@ -108,6 +109,8 @@ int main(int argc, char **argv)      // Files are passed by a parameter
         while (fscanf(ptr_file_input, "%d %c\n", &address, &RorW) != EOF){
             cache_results.acess_count++;
             if (RorW == 'R') {
+                line = make_line(address, BYTES_PER_WORD, words_per_line);
+                printf("The line: %ld\n", line);
                 number_of_reads++;
                 //read(...);
             }
