@@ -17,3 +17,9 @@ typedef struct desc {
     int associativity;           // Number of blocks per set
     char replacement_policy[5];  // LRY or FIFO + \0
 } Desc;
+
+// Prototype of used functions
+void generate_output(Results cache_results);
+int make_line(int address, int words_per_line, int bytes_per_word);
+int make_index(int number_of_lines_of_cache, int associativity);
+int make_tag(int number_of_lines_of_cache, int associativity);

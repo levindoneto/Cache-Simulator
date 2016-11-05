@@ -1,18 +1,20 @@
+/**
+ * --------------------------------------------------------------------------
+ * Cache Simulator
+ * Levindo Neto (https://github.com/levindoneto/Cache-Simulator)
+ * --------------------------------------------------------------------------
+ */
+
 // Libraries
 #include <stdio.h>
-#include "cache_simulator.h"
+#include "cache_simulator.h" // Header file with the structs and functions prototypes
 #include <stdlib.h>
 #include <string.h>
-#define DEBUG 0    // 0: FALSE, 1:TRUE
-#define BYTES_PER_WORD 1 // All words with 1 Byte (bytes_per_word)
+#define DEBUG 0                                              // 0: FALSE, 1:TRUE
+#define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 
-// Prototype of used functions
-void generate_output(Results cache_results);
-int make_line(int address, int words_per_line, int bytes_per_word);
-int make_index(int number_of_lines_of_cache, int associativity);
-int make_tag(int number_of_lines_of_cache, int associativity);
-
-/*
+/**************************** Functions ***************************************/
+/**
  * That function get the line (upper) of a given address by the CPU
  */
 int make_line(int address, int words_per_line, int bytes_per_word) {
@@ -21,7 +23,18 @@ int make_line(int address, int words_per_line, int bytes_per_word) {
     return line;
 }
 
-/*
+/**************************** Functions ***************************************/
+/**
+ * That function generates the index for the set in the cache
+ */
+int make_index (int number_of_sets, int line) {
+    int index;
+    index = line % number_of_sets;
+
+    return index;                               // index of the set in the cache
+}
+
+/**
  * That function generates a formated output with the results of cache simulation
  */
 void generate_output(Results cache_results){
@@ -42,8 +55,9 @@ void generate_output(Results cache_results){
 
     fclose(ptr_file_output);          // Close the output file (results)
 }
+/******************************************************************************/
 
-int main(int argc, char **argv)      // Files are passed by a parameter
+int main(int argc, char **argv)               // Files are passed by a parameter
 {
     Desc   cache_description;
     Results cache_results;
@@ -62,13 +76,13 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
     FILE *ptr_file_output;
-    char RorW;                  // Read or Write (address)
-    int number_of_reads = 0;    // Number of read request operations by the CPU
+    char RorW;                                        // Read or Write (address)
+    int number_of_reads = 0;     // Number of read request operations by the CPU
     int number_of_writes = 0;   // Number of write request operations by the CPU
     /*Informations of each address*/
-    int address;                // Address passed by the CPU
+    int address;                                    // Address passed by the CPU
     int words_per_line;
-    int number_of_sets;         // number_of_lines/associativity
+    int number_of_sets;                         // number_of_lines/associativity
     long int line;
     int tag;
     int index;
@@ -98,7 +112,8 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     /**************************************************************************/
 
     /***************** Input Trace File and simulation ************************/
-    words_per_line = cache_description.line_size/8; // 8 is the size of a word in this simulator
+    words_per_line = cache_description.line_size/BYTES_PER_WORD; // 8 is the size of a word in this simulator
+    number_of_sets = cache_description.number_of_lines / cache_description.associativity;
 
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -110,7 +125,14 @@ int main(int argc, char **argv)      // Files are passed by a parameter
             cache_results.acess_count++;
             if (RorW == 'R') {
                 line = make_line(address, BYTES_PER_WORD, words_per_line);
+                index = make_index (number_of_sets, line);
+
+                // DEBUG prints
+                #if DEBUG == 1
+                printf("Index: %d\n", index);
                 printf("The line: %ld\n", line);
+                #endif
+
                 number_of_reads++;
                 //read(...);
             }
@@ -133,8 +155,8 @@ int main(int argc, char **argv)      // Files are passed by a parameter
     generate_output(cache_results);
     /**************************************************************************/
 
-    fclose(ptr_file_specs_cache);     // Close the cache description file
-    fclose(ptr_file_input);           // Close the input file (trace file)
+    fclose(ptr_file_specs_cache);            // Close the cache description file
+    fclose(ptr_file_input);                 // Close the input file (trace file)
 
    return 0;
 }
