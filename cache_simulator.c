@@ -16,14 +16,14 @@
 /**************************** Functions ***************************************/
 /**
  * That function get the line (upper) of a given address by the CPU
+ * This upper is equal to the Tag information
  */
-int make_line(int address, int words_per_line, int bytes_per_word) {
+int make_upper(int address, int words_per_line, int bytes_per_word) {
     int line;
     line = ((address/words_per_line))/bytes_per_word;
     return line;
 }
 
-/**************************** Functions ***************************************/
 /**
  * That function generates the index for the set in the cache
  */
@@ -124,7 +124,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         while (fscanf(ptr_file_input, "%d %c\n", &address, &RorW) != EOF){
             cache_results.acess_count++;
             if (RorW == 'R') {
-                line = make_line(address, BYTES_PER_WORD, words_per_line);
+                line = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
 
                 // DEBUG prints
