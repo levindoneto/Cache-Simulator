@@ -12,11 +12,22 @@ typedef struct results {
 } Results;
 
 typedef struct desc {
-    int line_size;               // Block size
-    int number_of_lines;         // Number of blocks
-    int associativity;           // Number of blocks per set
-    char replacement_policy[5];  // LRY or FIFO + \0
+    int line_size;                                   // Block size
+    int number_of_lines;                             // Number of blocks
+    int associativity;                               // Number of blocks per set
+    char replacement_policy[5];                      // LRY or FIFO + \0
 } Desc;
+
+typedef struct cache {
+    int *** Cache_Data;  // The blocks are Cache_Data[set][line], with all words
+                         //    from the block.
+                         //  Cache_Data [set][line][word], that's enough, because all words
+                         //    in this case have one byte, and the fourth position of
+                         //    the array would be for acess the bytes in a word
+                         //    Cache [number_of_sets][cache_description.number_of_lines][words_per_line]
+    float *** T_Access; // Time stamp for the access in the cache memory (Used
+                        //     in the LRU Algorithm)
+} Cache;
 
 // Prototypes of used functions
 void generate_output(Results cache_results);

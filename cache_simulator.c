@@ -7,11 +7,11 @@
 
 // Libraries
 #include <stdio.h>
-#include "cache_simulator.h" // Header file with the structs and functions prototypes
+#include "cache_simulator.h"           // Header file with the structs and functions prototypes
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>                                // For the time stamp stuff
-#define DEBUG 0                                              // 0: FALSE, 1:TRUE
+#include <sys/time.h>                  // For the time stamp stuff
+#define DEBUG 0                        // 0: FALSE, 1:TRUE
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 
 /**************************** Functions ***************************************/
@@ -54,7 +54,7 @@ void generate_output(Results cache_results){
         fprintf(ptr_file_output, "Write misses:%d\n", cache_results.write_misses);
     }
 
-    fclose(ptr_file_output);          // Close the output file (results)
+    fclose(ptr_file_output);                  // Close the output file (results)
 }
 /******************************************************************************/
 
@@ -62,8 +62,9 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 {
     printf("\n*** Cache Simulator ***\n");
 
-    Desc   cache_description;
+    Desc    cache_description;
     Results cache_results;
+    Cache   cache_mem;   // This contains the data, access and load informations
 
     // Init of results
     cache_results.acess_count = 0;
@@ -77,11 +78,11 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
     FILE *ptr_file_output;
-    char RorW;                                        // Read or Write (address)
-    int number_of_reads = 0;     // Number of read request operations by the CPU
+    char RorW;                  // Read or Write (address)
+    int number_of_reads = 0;    // Number of read request operations by the CPU
     int number_of_writes = 0;   // Number of write request operations by the CPU
     /*Informations of each address*/
-    int address;                                    // Address passed by the CPU
+    int address;                                // Address passed by the CPU
     int words_per_line;
     int number_of_sets;                         // number_of_lines/associativity
     int line;
@@ -116,27 +117,24 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     number_of_sets = cache_description.number_of_lines / cache_description.associativity;
 
     /**************** Alloc space for cache memory data ***********************/
-    int *** Cache; // Cache [set][line][word], that's enough, because all words
-                   //   in this case have one byte, and the fourth position of
-                   //   the array would be for acess the bytes in a word
-                   //   Cache [number_of_sets][cache_description.number_of_lines][words_per_line]
-    int i, j;      // index for the allocation with the loop for
-    Cache = malloc( number_of_sets * sizeof(int));
+
+    int i, j;           // index for the allocation with the loop for
+    cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int)); // (*cache_mem).Cache_Data
     for (i=0; i<number_of_sets; i++) {
-        Cache[i] = malloc (cache_description.number_of_lines * sizeof(int));
+        cache_mem.Cache_Data[i] = malloc (cache_description.number_of_lines * sizeof(int));
         for (j=0; j<cache_description.number_of_lines; j++) {
-            Cache[i][j] = malloc(words_per_line * sizeof(int));
+            cache_mem.Cache_Data[i][j] = malloc(words_per_line * sizeof(int));
         }
     }
+    //printf ("co: %d", co);
     /**************************************************************************/
 
-    /**************** Alloc space for Access Time Stamp***********************/
-    float *** T_Access;
-    T_Access = malloc( number_of_sets * sizeof(float));
+    /**************** Alloc space for Access Time Stamp************************/
+    cache_mem.T_Access = malloc( number_of_sets * sizeof(float));
     for (i=0; i<number_of_sets; i++) {
-        T_Access[i] = malloc (cache_description.number_of_lines * sizeof(float));
+        cache_mem.T_Access[i] = malloc (cache_description.number_of_lines * sizeof(float));
         for (j=0; j<cache_description.number_of_lines; j++) {
-            T_Access[i][j] = malloc(words_per_line * sizeof(float));
+            cache_mem.T_Access[i][j] = malloc(words_per_line * sizeof(float));
         }
     }
     /**************************************************************************/
@@ -185,14 +183,11 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     generate_output(cache_results);
     /**************************************************************************/
 
-    free(Cache);                       // Free in the memory for the Cache[][][]
-    Cache = NULL;
+    cache_mem.Cache_Data = NULL; // Free in the memory for the Cache[][][]
+    cache_mem.T_Access = NULL; // Free in the memory for the T_Access[][][]
 
-    free(T_Access);                 // Free in the memory for the T_Access[][][]
-    T_Access = NULL;
-
-    fclose(ptr_file_specs_cache);            // Close the cache description file
-    fclose(ptr_file_input);                 // Close the input file (trace file)
+    fclose(ptr_file_specs_cache);      // Close the cache description file
+    fclose(ptr_file_input);            // Close the input file (trace file)
 
    return 0;
 }
