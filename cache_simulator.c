@@ -111,9 +111,26 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     #endif
     /**************************************************************************/
 
-    /***************** Input Trace File and simulation ************************/
     words_per_line = cache_description.line_size/BYTES_PER_WORD; // 8 is the size of a word in this simulator
     number_of_sets = cache_description.number_of_lines / cache_description.associativity;
+
+    /**************** Alloc space for cache memory data ***********************/
+    int *** Cache; // Cache [set][line][word], that's enough, because all words
+                   //   in this case have one byte, and the fourth position of
+                   //   the array would be for acess the bytes in a word
+                   //   Cache [number_of_sets][cache_description.number_of_lines][words_per_line]
+    int i, j;      // index for the allocation with the loop for
+    Cache = malloc( number_of_sets * sizeof(int));
+    for (i=0; i<number_of_sets; i++) {
+        Cache[i] = malloc (cache_description.number_of_lines * sizeof(int));
+        for (j=0; j<cache_description.number_of_lines; j++) {
+            Cache[i][j] = malloc(words_per_line * sizeof(int));
+        }
+    }
+    /**************************************************************************/
+
+    /***************** Input Trace File and simulation ************************/
+
 
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
@@ -154,6 +171,9 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /****************************** Output ************************************/
     generate_output(cache_results);
     /**************************************************************************/
+
+    free(Cache);                           // Dealloc memory for the Cache[][][]
+    Cache = NULL;
 
     fclose(ptr_file_specs_cache);            // Close the cache description file
     fclose(ptr_file_input);                 // Close the input file (trace file)
