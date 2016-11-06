@@ -4,13 +4,13 @@
  * Levindo Neto (https://github.com/levindoneto/Cache-Simulator)
  * --------------------------------------------------------------------------
  */
-
+#include <unistd.h>
 // Libraries
 #include <stdio.h>
 #include "cache_simulator.h"           // Header file with the structs and functions prototypes
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>                  // For the time stamp stuff
+#include <time.h>                      // For the time stamp stuff
 #define DEBUG 0                        // 0: FALSE, 1:TRUE
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 
@@ -60,7 +60,24 @@ void generate_output(Results cache_results){
 
 int main(int argc, char **argv)               // Files are passed by a parameter
 {
+
+    /* Getting time stamp in microseconds (used in LRU and FIFO replacement policy) */
+    struct timeval tv;
+    time_t curtime;
+
+    gettimeofday(&tv, NULL);
+    curtime=tv.tv_usec;
+
+    //printf("TEMPO: %ld\n", (long int) curtime);
+
+    sleep(2);
+    gettimeofday(&tv, NULL);
+    curtime=tv.tv_usec;
+    //printf("TEMPO 2: %ld\n", (long int) curtime);
+    /**************************************************************************/
+
     printf("\n*** Cache Simulator ***\n");
+    //printf("TIME1%lld\n", (long long) time(NULL));
 
     Desc    cache_description;
     Results cache_results;
@@ -130,21 +147,21 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     /**************** Alloc space for Access Time Stamp************************/
-    cache_mem.T_Access = malloc( number_of_sets * sizeof(float));
+    cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Access[i] = malloc (cache_description.number_of_lines * sizeof(float));
+        cache_mem.T_Access[i] = malloc (cache_description.number_of_lines * sizeof(time_t));
         for (j=0; j<cache_description.number_of_lines; j++) {
-            cache_mem.T_Access[i][j] = malloc(words_per_line * sizeof(float));
+            cache_mem.T_Access[i][j] = malloc(words_per_line * sizeof(time_t));
         }
     }
     /**************************************************************************/
 
-    /**************** Alloc space for Access Time Stamp************************/
-    cache_mem.T_Load = malloc( number_of_sets * sizeof(float));
+    /**************** Alloc space for load Time Stamp************************/
+    cache_mem.T_Load = malloc( number_of_sets * sizeof(time_t));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Load[i] = malloc (cache_description.number_of_lines * sizeof(float));
+        cache_mem.T_Load[i] = malloc (cache_description.number_of_lines * sizeof(time_t));
         for (j=0; j<cache_description.number_of_lines; j++) {
-            cache_mem.T_Load[i][j] = malloc(words_per_line * sizeof(float));
+            cache_mem.T_Load[i][j] = malloc(words_per_line * sizeof(time_t));
         }
     }
     /**************************************************************************/
@@ -199,6 +216,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     fclose(ptr_file_specs_cache);      // Close the cache description file
     fclose(ptr_file_input);            // Close the input file (trace file)
+
 
    return 0;
 }
