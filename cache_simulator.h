@@ -25,8 +25,10 @@ typedef struct cache {
                          //    in this case have one byte, and the fourth position of
                          //    the array would be for acess the bytes in a word
                          //    Cache [number_of_sets][cache_description.number_of_lines][words_per_line]
-    float *** T_Access; // Time stamp for the access in the cache memory (Used
+    float *** T_Access; // Time stamp for the access in the cache memory (used
                         //     in the LRU Algorithm)
+    float *** T_Load;   // Time stamp for the data load in the cache memory
+                        //     (used in the FIFO Algorithm)
 } Cache;
 
 // Prototypes of used functions

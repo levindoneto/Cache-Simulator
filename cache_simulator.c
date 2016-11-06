@@ -139,6 +139,16 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     /**************************************************************************/
 
+    /**************** Alloc space for Access Time Stamp************************/
+    cache_mem.T_Load = malloc( number_of_sets * sizeof(float));
+    for (i=0; i<number_of_sets; i++) {
+        cache_mem.T_Load[i] = malloc (cache_description.number_of_lines * sizeof(float));
+        for (j=0; j<cache_description.number_of_lines; j++) {
+            cache_mem.T_Load[i][j] = malloc(words_per_line * sizeof(float));
+        }
+    }
+    /**************************************************************************/
+
     /***************** Input Trace File and simulation ************************/
 
 
@@ -184,7 +194,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     cache_mem.Cache_Data = NULL; // Free in the memory for the Cache[][][]
-    cache_mem.T_Access = NULL; // Free in the memory for the T_Access[][][]
+    cache_mem.T_Access   = NULL; // Free in the memory for the T_Access[][][]
+    cache_mem.T_Load     = NULL; // Free in the memory for the T_Load[][][]
 
     fclose(ptr_file_specs_cache);      // Close the cache description file
     fclose(ptr_file_input);            // Close the input file (trace file)
