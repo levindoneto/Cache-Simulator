@@ -10,6 +10,7 @@
 #include "cache_simulator.h" // Header file with the structs and functions prototypes
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>                                // For the time stamp stuff
 #define DEBUG 0                                              // 0: FALSE, 1:TRUE
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 
@@ -27,9 +28,9 @@ int make_upper(int address, int words_per_line, int bytes_per_word) {
 /**
  * That function generates the index for the set in the cache
  */
-int make_index (int number_of_sets, int line) {
+int make_index (int number_of_sets, int upper) {
     int index;
-    index = line % number_of_sets;
+    index = upper % number_of_sets;
 
     return index;                               // index of the set in the cache
 }
@@ -59,6 +60,8 @@ void generate_output(Results cache_results){
 
 int main(int argc, char **argv)               // Files are passed by a parameter
 {
+    printf("\n*** Cache Simulator ***\n");
+
     Desc   cache_description;
     Results cache_results;
 
@@ -68,8 +71,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     cache_results.read_misses = 0;
     cache_results.write_hits = 0;
     cache_results.write_misses = 0;
-
-    printf("\n*** Cache Simulator ***\n");
 
     char *description = argv[1];
     char *input = argv[2];
@@ -83,7 +84,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     int address;                                    // Address passed by the CPU
     int words_per_line;
     int number_of_sets;                         // number_of_lines/associativity
-    long int line;
+    int line;
     int tag;
     int index;
 
@@ -95,7 +96,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         printf("\nThe file of cache description is unable to open!\n\n");
         return -1;
     }
-    else {                            // File can be opened
+    else {                                                 // File can be opened
         fscanf(ptr_file_specs_cache, "line size = %d\n", &cache_description.line_size);
         fscanf(ptr_file_specs_cache, "number of lines = %d\n", &cache_description.number_of_lines);
         fscanf(ptr_file_specs_cache, "associativity = %d\n", &cache_description.associativity);
@@ -129,6 +130,17 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     /**************************************************************************/
 
+    /**************** Alloc space for Access Time Stamp***********************/
+    float *** T_Access;
+    T_Access = malloc( number_of_sets * sizeof(float));
+    for (i=0; i<number_of_sets; i++) {
+        T_Access[i] = malloc (cache_description.number_of_lines * sizeof(float));
+        for (j=0; j<cache_description.number_of_lines; j++) {
+            T_Access[i][j] = malloc(words_per_line * sizeof(float));
+        }
+    }
+    /**************************************************************************/
+
     /***************** Input Trace File and simulation ************************/
 
 
@@ -146,8 +158,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
                 // DEBUG prints
                 #if DEBUG == 1
-                printf("Index: %d\n", index);
-                printf("The line: %ld\n", line);
+                //printf("Index: %d\n", index);
+                printf("The line: %d\n", line);
                 #endif
 
                 number_of_reads++;
@@ -166,14 +178,18 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
         #endif
     }
+
     /**************************************************************************/
 
     /****************************** Output ************************************/
     generate_output(cache_results);
     /**************************************************************************/
 
-    free(Cache);                           // Dealloc memory for the Cache[][][]
+    free(Cache);                       // Free in the memory for the Cache[][][]
     Cache = NULL;
+
+    free(T_Access);                 // Free in the memory for the T_Access[][][]
+    T_Access = NULL;
 
     fclose(ptr_file_specs_cache);            // Close the cache description file
     fclose(ptr_file_input);                 // Close the input file (trace file)
