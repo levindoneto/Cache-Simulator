@@ -50,9 +50,27 @@ void write_cache (Cache cache1, int index1, int line1, int data1, int associativ
     // Writing the data in the set (by index) in the position that contains the
     //     upper (by line)
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-    printf("POSITION::%d\n", position_that_has_this_upper);
+    //cache1.Cache_Upper
+    //Dirty_Bit
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
+    //cache1.T_Load
     cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
     //printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
+}
+
+int read_cache (Cache cache1, int index1, int line1, int data1, int associativity) {
+    int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
+    //cache1.Cache_Upper
+    //Dirty_Bit
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
+    //cache1.T_Load
+    return cache1.Cache_Data[index1][position_that_has_this_upper];
 }
 
 /**
@@ -212,7 +230,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 #endif
 
                 number_of_reads++;
-                //read(...);
+                read_cache(cache_mem, index, line, data, cache_description.associativity);
             }
             else if (RorW == 'W'){
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
