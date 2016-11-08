@@ -45,7 +45,7 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
             return block_i;               // Upper inside of the set found
         }
     }
-    //printf("foi ateh o final da get position\n");
+
     return -1;                              // Upper inside of the set not found
 }
 
