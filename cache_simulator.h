@@ -37,7 +37,7 @@ typedef struct cache {
                            //    information. Sets aren't ordered by upper or any
                            //    particular order.
 
-    //int    ** Dirty_Bit;  // That is used in the write back polocy for blocks
+    //int    ** Dirty_Bit; // That is used in the write back polocy for blocks
                           //     modified only in the cache memory.
                           //     DIRTY: 1, CLEAN: 0.
 
@@ -55,7 +55,7 @@ int make_upper(long unsigned address, int words_per_line, int bytes_per_word);
 int make_index(int number_of_lines_of_cache, long unsigned upper);
 int make_tag(int number_of_lines_of_cache, int associativity);
 int getPosUpper (Cache cache, int index, long unsigned line, int associativity);
-void write_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
+void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity);
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
 void generate_output(Results cache_results);
 /******************************************************************************/

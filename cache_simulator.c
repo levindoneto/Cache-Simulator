@@ -49,16 +49,31 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
     return -1;                              // Upper inside of the set not found
 }
 
-void write_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
+void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
     // Writing the data in the set (by index) in the position that contains the
     //     upper (by line)
+    //printf ("primeira posicao: %d", cache1.Cache_Data[0][0]);
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-
     if (position_that_has_this_upper == -1) {
-      printf("to do write miss\n");
+        /* write_miss++ */
+        // Nenhuma posição possue uma linha com o upper solicitado
+        // Pode ser que a cache esteja cheia, dai tem que usar politica de substituicao
+        // Se ainda tinha lugar na cache basta sortear um dos espaços livres pra colocar a tag.
+        // Se nao ha local livre, dai tem que "substituir" (a substituicao nao ocorre de fato)
+        // o que acontece apenas e' que o T_Load e o T_Access sao atualizados o dado da linha
+        // Usa a int there_Are_Space_Set (cache1, index1) pra saber isso.
+
+        result1->write_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
+        //printf("write_misses: %d\n", result1->write_misses);
     }
     else {
-      printf("to do write hit\n");
+        // write_hit++
+        // The position with the upper was found in the passed set (index1)
+        //     The T_Access and T_Load is updated in this case, because a number_of_writes
+        //     data is writed in a position at the set in cache that already have
+        //     an another data.
+        result1->write_hits++;
+        //printf("to do write hit\n");
     }
     //printf("POSITION_LINE %d\n", position_that_has_this_upper);
     //cache1.Cache_Upper
@@ -221,7 +236,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     /***************** Input Trace File and simulation ************************/
 
-
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
         printf("\nThe file of Input is unable to open!\n\n");
@@ -249,7 +263,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 index = make_index (number_of_sets, line);
                 //printf("INDEXXXX: %d\n", index);
                 number_of_writes++;
-                write_cache(cache_mem, index, line, data, cache_description.associativity);
+                write_cache(cache_mem, &cache_results, index, line, data, cache_description.associativity);
             }
             else {
                 printf("\nUndefined operation request detected\n");
