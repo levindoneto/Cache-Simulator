@@ -37,6 +37,9 @@ typedef struct cache {
                            //    information. Sets aren't ordered by upper or any
                            //    particular order.
 
+    int    ** Dirty_Bit;  // That is used in the write back polocy for blocks
+                          //     modified only in the cache memory.
+
     time_t ** T_Access;   // Time stamp for the access in the cache memory (used
                           //     in the LRU Algorithm).
 

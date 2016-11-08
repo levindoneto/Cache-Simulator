@@ -141,10 +141,17 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     /**************************************************************************/
 
-    /**************** Alloc space for Cache Upper************************/
+    /******************* Alloc space for Cache Upper **************************/
     cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(int));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.Cache_Upper[i] = malloc (cache_description.associativity * sizeof(int));
+    }
+    /**************************************************************************/
+
+    /******************** Alloc space for Dirty Bit ***************************/
+    cache_mem.Dirty_Bit = malloc( number_of_sets * sizeof(int));
+    for (i=0; i<number_of_sets; i++) {
+        cache_mem.Dirty_Bit[i] = malloc (cache_description.associativity * sizeof(int));
     }
     /**************************************************************************/
 
@@ -195,22 +202,26 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
             }
         }
+
+        // Initial tests
+          // address=2147483647
+
         printf("a: %d %c\n", address, RorW );
         #if DEBUG == 1
         printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
         #endif
     }
-
     /**************************************************************************/
 
     /****************************** Output ************************************/
     generate_output(cache_results);
     /**************************************************************************/
 
-    cache_mem.Cache_Data = NULL;    // Free in the memory for the Cache_Data[][]
-    cache_mem.Cache_Upper = NULL;   // Free in the memory for the Cache_Upper[][]
-    cache_mem.T_Access   = NULL;    // Free in the memory for the T_Access[][]
-    cache_mem.T_Load     = NULL;    // Free in the memory for the T_Load[][]
+    cache_mem.Cache_Data  = NULL;  // "Free" in the memory for the Cache_Data[][]
+    cache_mem.Cache_Upper = NULL;  // "Free" in the memory for the Cache_Upper[][]
+    cache_mem.Dirty_Bit   = NULL;  // "Free" in the memory for the Dirty_Bit[][]
+    cache_mem.T_Access    = NULL;  // "Free" in the memory for the T_Access[][]
+    cache_mem.T_Load      = NULL;  // "Free" in the memory for the T_Load[][]
 
     fclose(ptr_file_specs_cache);           // Close the cache description file
     fclose(ptr_file_input);                 // Close the input file (trace file)
