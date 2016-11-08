@@ -36,11 +36,10 @@ int make_index (int number_of_sets, int upper) {
 }
 
 int getPosUpper (Cache cache, int index, int line, int associativity) {
-    int pos_upper;
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
         if (cache.Cache_Upper[index][block_i] == line){
-            return pos_upper;               // Upper inside of the set found
+            return block_i;               // Upper inside of the set found
         }
     }
     return -1;                              // Upper inside of the set not found
@@ -137,10 +136,10 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     int number_of_reads = 0;    // Number of read request operations by the CPU
     int number_of_writes = 0;   // Number of write request operations by the CPU
     /*Informations of each address*/
-    int address;                                // Address passed by the CPU
+    long unsigned address;                                // Address passed by the CPU
     int words_per_line;
     int number_of_sets;                         // number_of_lines/associativity
-    int line;
+    long unsigned line;
     int tag;
     int index;
     int data = 1;
@@ -159,7 +158,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         fscanf(ptr_file_specs_cache, "associativity = %d\n", &cache_description.associativity);
         fscanf(ptr_file_specs_cache, "replacement policy = %s\n", cache_description.replacement_policy);
     }
-
+    fclose(ptr_file_specs_cache);           // Close the cache description file
     // DEBUG prints
     #if DEBUG == 1
     printf("%d\n",   cache_description.line_size);
@@ -181,18 +180,18 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     /******************* Alloc space for Cache Upper **************************/
-    cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(int));
+    cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(long unsigned));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.Cache_Upper[i] = malloc (cache_description.associativity * sizeof(int));
+        cache_mem.Cache_Upper[i] = malloc (cache_description.associativity * sizeof(long unsigned));
     }
     /**************************************************************************/
 
-    /******************** Alloc space for Dirty Bit ***************************/
+    /******************** Alloc space for Dirty Bit **************************
     cache_mem.Dirty_Bit = malloc( number_of_sets * sizeof(int));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.Dirty_Bit[i] = malloc (cache_description.associativity * sizeof(int));
     }
-    /**************************************************************************/
+    *************************************************************************/
 
     /**************** Alloc space for Access Time Stamp************************/
     cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t));
@@ -217,26 +216,26 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         return -1;
     }
     else {
-        while (fscanf(ptr_file_input, "%d %c\n", &address, &RorW) != EOF){
+        while (fscanf(ptr_file_input, "%lu %c\n", &address, &RorW) != EOF){
             cache_results.acess_count++;
             if (RorW == 'R') {
                 line = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
 
                 // DEBUG prints
-                #if DEBUG == 1
+                #if DEBUG == 0
                 //printf("Index: %d\n", index);
-                printf("The line: %d\n", line);
+                printf("The line: %lu\n", line);
                 #endif
 
                 number_of_reads++;
-                read_cache(cache_mem, index, line, data, cache_description.associativity);
+                //read_cache(cache_mem, index, line, data, cache_description.associativity);
             }
             else if (RorW == 'W'){
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
                 number_of_writes++;
-                write_cache(cache_mem, index, line, data, cache_description.associativity);
+                //write_cache(cache_mem, index, line, data, cache_description.associativity);
             }
             else {
                 printf("\nUndefined operation request detected\n");
@@ -247,7 +246,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
         // Initial tests
           // address=2147483647
 
-        printf("a: %d %c\n", address, RorW );
         #if DEBUG == 1
         printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
         #endif
@@ -260,13 +258,12 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     cache_mem.Cache_Data  = NULL;  // "Free" in the memory for the Cache_Data[][]
     cache_mem.Cache_Upper = NULL;  // "Free" in the memory for the Cache_Upper[][]
-    cache_mem.Dirty_Bit   = NULL;  // "Free" in the memory for the Dirty_Bit[][]
+    //cache_mem.Dirty_Bit   = NULL;  // "Free" in the memory for the Dirty_Bit[][]
     cache_mem.T_Access    = NULL;  // "Free" in the memory for the T_Access[][]
     cache_mem.T_Load      = NULL;  // "Free" in the memory for the T_Load[][]
 
-    fclose(ptr_file_specs_cache);           // Close the cache description file
-    fclose(ptr_file_input);                 // Close the input file (trace file)
 
+    fclose(ptr_file_input);                 // Close the input file (trace file)
 
    return 0;
 }

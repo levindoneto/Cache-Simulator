@@ -32,12 +32,12 @@ typedef struct cache {
                            // This data is modeled with a value 1 (there is data)
                            //    and  0 (there isn't data) in the block.
 
-    int    ** Cache_Upper; // The informations about Upper is used to differentiate
+    long unsigned    ** Cache_Upper; // The informations about Upper is used to differentiate
                            //    two or more blocks with the same set (index)
                            //    information. Sets aren't ordered by upper or any
                            //    particular order.
 
-    int    ** Dirty_Bit;  // That is used in the write back polocy for blocks
+    //int    ** Dirty_Bit;  // That is used in the write back polocy for blocks
                           //     modified only in the cache memory.
                           //     DIRTY: 1, CLEAN: 0.
 
