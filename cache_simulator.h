@@ -51,11 +51,11 @@ typedef struct cache {
 /******************************************************************************/
 
 /************************ Prototypes of used functions ************************/
-int make_upper(int address, int words_per_line, int bytes_per_word);
-int make_index(int number_of_lines_of_cache, int associativity);
+int make_upper(long unsigned address, int words_per_line, int bytes_per_word);
+int make_index(int number_of_lines_of_cache, long unsigned upper);
 int make_tag(int number_of_lines_of_cache, int associativity);
-int getPosUpper (Cache cache, int index, int line, int associativity);
-void write_cache (Cache cache1, int index1, int line1, int data1, int associativity);
-int read_cache (Cache cache1, int index1, int line1, int data1, int associativity);
+int getPosUpper (Cache cache, int index, long unsigned line, int associativity);
+void write_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
+int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
 void generate_output(Results cache_results);
 /******************************************************************************/

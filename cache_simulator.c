@@ -19,7 +19,7 @@
  * That function get the line (upper) of a given address by the CPU
  * This upper is equal to the Tag information
  */
-int make_upper(int address, int words_per_line, int bytes_per_word) {
+int make_upper(long unsigned address, int words_per_line, int bytes_per_word) {
     int line;
     line = ((address/words_per_line))/bytes_per_word;
     return line;
@@ -28,39 +28,51 @@ int make_upper(int address, int words_per_line, int bytes_per_word) {
 /**
  * That function generates the index for the set in the cache
  */
-int make_index (int number_of_sets, int upper) {
+int make_index (int number_of_sets, long unsigned upper) {
     int index;
+    //printf("NUMBER OF SETS: %d\n", number_of_sets);
+    //printf("UPPER: %lu\n", upper);
     index = upper % number_of_sets;
 
     return index;                               // index of the set in the cache
 }
 
-int getPosUpper (Cache cache, int index, int line, int associativity) {
+int getPosUpper (Cache cache, int index, long unsigned line, int associativity) {
     int block_i;
+    //printf("INDEX POS UPPER %d, ASSOC: %d, LINE: %lu\n", index, associativity, line);
     for (block_i=0; block_i<associativity; block_i++) {
         if (cache.Cache_Upper[index][block_i] == line){
             return block_i;               // Upper inside of the set found
         }
     }
+    //printf("foi ateh o final da get position\n");
     return -1;                              // Upper inside of the set not found
 }
 
-void write_cache (Cache cache1, int index1, int line1, int data1, int associativity) {
+void write_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
     // Writing the data in the set (by index) in the position that contains the
     //     upper (by line)
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
+
+    if (position_that_has_this_upper == -1) {
+      printf("to do write miss\n");
+    }
+    else {
+      printf("to do write hit\n");
+    }
+    //printf("POSITION_LINE %d\n", position_that_has_this_upper);
     //cache1.Cache_Upper
     //Dirty_Bit
 
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
+    //cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
     //cache1.T_Load
-    cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
+    //cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
     //printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
 }
 
-int read_cache (Cache cache1, int index1, int line1, int data1, int associativity) {
+int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     //cache1.Cache_Upper
     //Dirty_Bit
@@ -217,6 +229,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     else {
         while (fscanf(ptr_file_input, "%lu %c\n", &address, &RorW) != EOF){
+            //printf("ADDRESS: %lu e RW: %c\n", address, RorW);
             cache_results.acess_count++;
             if (RorW == 'R') {
                 line = make_upper(address, BYTES_PER_WORD, words_per_line);
@@ -225,7 +238,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 // DEBUG prints
                 #if DEBUG == 0
                 //printf("Index: %d\n", index);
-                printf("The line: %lu\n", line);
+                //printf("The line: %lu\n", line);
                 #endif
 
                 number_of_reads++;
@@ -234,15 +247,15 @@ int main(int argc, char **argv)               // Files are passed by a parameter
             else if (RorW == 'W'){
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
+                //printf("INDEXXXX: %d\n", index);
                 number_of_writes++;
-                //write_cache(cache_mem, index, line, data, cache_description.associativity);
+                write_cache(cache_mem, index, line, data, cache_description.associativity);
             }
             else {
                 printf("\nUndefined operation request detected\n");
 
             }
         }
-
         // Initial tests
           // address=2147483647
 
