@@ -130,7 +130,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     #endif
     /**************************************************************************/
 
-    words_per_line = cache_description.line_size/BYTES_PER_WORD; // 8 is the size of a word in this simulator
+    words_per_line = cache_description.line_size/BYTES_PER_WORD; // 1 byte is the size of a word in this simulator
     number_of_sets = cache_description.number_of_lines / cache_description.associativity;
 
     /**************** Alloc space for cache memory data ***********************/
@@ -138,8 +138,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     int i, j;           // index for the allocation with the loop for
     cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int)); // (*cache_mem).Cache_Data
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.Cache_Data[i] = malloc (cache_description.number_of_lines * sizeof(int));
-        for (j=0; j<cache_description.number_of_lines; j++) {
+        cache_mem.Cache_Data[i] = malloc (cache_description.associativity * sizeof(int));
+        for (j=0; j<cache_description.associativity; j++) {
             cache_mem.Cache_Data[i][j] = malloc(words_per_line * sizeof(int));
         }
     }
@@ -149,8 +149,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************** Alloc space for Access Time Stamp************************/
     cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Access[i] = malloc (cache_description.number_of_lines * sizeof(time_t));
-        for (j=0; j<cache_description.number_of_lines; j++) {
+        cache_mem.T_Access[i] = malloc (cache_description.associativity * sizeof(time_t));
+        for (j=0; j<cache_description.associativity; j++) {
             cache_mem.T_Access[i][j] = malloc(words_per_line * sizeof(time_t));
         }
     }
@@ -159,8 +159,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************** Alloc space for load Time Stamp************************/
     cache_mem.T_Load = malloc( number_of_sets * sizeof(time_t));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Load[i] = malloc (cache_description.number_of_lines * sizeof(time_t));
-        for (j=0; j<cache_description.number_of_lines; j++) {
+        cache_mem.T_Load[i] = malloc (cache_description.associativity * sizeof(time_t));
+        for (j=0; j<cache_description.associativity; j++) {
             cache_mem.T_Load[i][j] = malloc(words_per_line * sizeof(time_t));
         }
     }
