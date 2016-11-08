@@ -35,13 +35,24 @@ int make_index (int number_of_sets, int upper) {
     return index;                               // index of the set in the cache
 }
 
-void write_cache (Cache cache1, int index1, int line1, int data1) {
+int getPosUpper (Cache cache, int index, int line, int associativity) {
+    int pos_upper;
+    int block_i;
+    for (block_i=0; block_i<associativity; block_i++) {
+        if (cache.Cache_Upper[index][block_i] == line){
+            return pos_upper;               // Upper inside of the set found
+        }
+    }
+    return -1;                              // Upper inside of the set not found
+}
+
+void write_cache (Cache cache1, int index1, int line1, int data1, int associativity) {
     // Writing the data in the set (by index) in the position that contains the
     //     upper (by line)
-    int position_that_has_this_upper = 0;
-    printf("%d\n", line1);
+    int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
+    printf("POSITION::%d\n", position_that_has_this_upper);
     cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
-    printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
+    //printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
 }
 
 /**
@@ -207,7 +218,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
                 number_of_writes++;
-                write_cache(cache_mem, index, line, data);
+                write_cache(cache_mem, index, line, data, cache_description.associativity);
             }
             else {
                 printf("\nUndefined operation request detected\n");
