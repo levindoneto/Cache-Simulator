@@ -133,14 +133,19 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     words_per_line = cache_description.line_size/BYTES_PER_WORD; // 1 byte is the size of a word in this simulator
     number_of_sets = cache_description.number_of_lines / cache_description.associativity;
 
-    /**************** Alloc space for cache memory data ***********************/
-
+    /**************** Alloc space for Cache Memory Data ***********************/
     int i, j;           // index for the allocation with the loop for
-    cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int)); // (*cache_mem).Cache_Data
+    cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.Cache_Data[i] = malloc (cache_description.associativity * sizeof(int));
     }
-    //printf ("co: %d", co);
+    /**************************************************************************/
+
+    /**************** Alloc space for Cache Upper************************/
+    cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(int));
+    for (i=0; i<number_of_sets; i++) {
+        cache_mem.Cache_Upper[i] = malloc (cache_description.associativity * sizeof(int));
+    }
     /**************************************************************************/
 
     /**************** Alloc space for Access Time Stamp************************/
@@ -190,6 +195,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
             }
         }
+        printf("a: %d %c\n", address, RorW );
         #if DEBUG == 1
         printf("\nR:%d, W:%d\n", number_of_reads, number_of_writes);
         #endif
@@ -201,12 +207,13 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     generate_output(cache_results);
     /**************************************************************************/
 
-    cache_mem.Cache_Data = NULL; // Free in the memory for the Cache[][][]
-    cache_mem.T_Access   = NULL; // Free in the memory for the T_Access[][][]
-    cache_mem.T_Load     = NULL; // Free in the memory for the T_Load[][][]
+    cache_mem.Cache_Data = NULL;    // Free in the memory for the Cache_Data[][]
+    cache_mem.Cache_Upper = NULL;   // Free in the memory for the Cache_Upper[][]
+    cache_mem.T_Access   = NULL;    // Free in the memory for the T_Access[][]
+    cache_mem.T_Load     = NULL;    // Free in the memory for the T_Load[][]
 
-    fclose(ptr_file_specs_cache);      // Close the cache description file
-    fclose(ptr_file_input);            // Close the input file (trace file)
+    fclose(ptr_file_specs_cache);           // Close the cache description file
+    fclose(ptr_file_input);                 // Close the input file (trace file)
 
 
    return 0;
