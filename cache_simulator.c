@@ -62,7 +62,7 @@ void write_cache (Cache cache1, int index1, long unsigned line1, int data1, int 
     }
     //printf("POSITION_LINE %d\n", position_that_has_this_upper);
     //cache1.Cache_Upper
-    //Dirty_Bit
+
 
     struct timeval tv;
     gettimeofday(&tv, NULL);
