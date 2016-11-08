@@ -35,6 +35,15 @@ int make_index (int number_of_sets, int upper) {
     return index;                               // index of the set in the cache
 }
 
+void write_cache (Cache cache1, int index1, int line1, int data1) {
+    // Writing the data in the set (by index) in the position that contains the
+    //     upper (by line)
+    int position_that_has_this_upper = 0;
+    printf("%d\n", line1);
+    cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
+    printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
+}
+
 /**
  * That function generates a formated output with the results of cache simulation
  */
@@ -105,6 +114,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     int line;
     int tag;
     int index;
+    int data = 1;
 
     /*********************** Cache Description ********************************/
     ptr_file_specs_cache = fopen(description, "rb");
@@ -194,8 +204,10 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 //read(...);
             }
             else if (RorW == 'W'){
+                line  = make_upper(address, BYTES_PER_WORD, words_per_line);
+                index = make_index (number_of_sets, line);
                 number_of_writes++;
-                //write(...);
+                write_cache(cache_mem, index, line, data);
             }
             else {
                 printf("\nUndefined operation request detected\n");

@@ -39,6 +39,7 @@ typedef struct cache {
 
     int    ** Dirty_Bit;  // That is used in the write back polocy for blocks
                           //     modified only in the cache memory.
+                          //     DIRTY: 1, CLEAN: 0.
 
     time_t ** T_Access;   // Time stamp for the access in the cache memory (used
                           //     in the LRU Algorithm).
@@ -50,8 +51,8 @@ typedef struct cache {
 /******************************************************************************/
 
 /************************ Prototypes of used functions ************************/
-void generate_output(Results cache_results);
 int make_upper(int address, int words_per_line, int bytes_per_word);
 int make_index(int number_of_lines_of_cache, int associativity);
 int make_tag(int number_of_lines_of_cache, int associativity);
-/******************************************************************************/
+void write_cache (Cache cache1, int index1, int line1, int data1);
+void generate_output(Results cache_results);/******************************************************************************/
