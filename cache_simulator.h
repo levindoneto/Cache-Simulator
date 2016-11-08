@@ -22,15 +22,16 @@ typedef struct desc {
 } Desc;
 
 typedef struct cache {
-    int *** Cache_Data;  // The blocks are Cache_Data[set][line], with all words
+    int ** Cache_Data;  // The blocks are Cache_Data[set][line], with all words
                          //    from the block.
-                         //  Cache_Data [set][line][word], that's enough, because all words
-                         //    in this case have one byte, and the fourth position of
+                         //  Cache_Data [set][line], that's enough, because in
+                         //    case we don't need informations about word and
+                         //    all words have one byte, and the fourth position of
                          //    the array would be for acess the bytes in a word
-                         //    Cache [number_of_sets][cache_description.number_of_lines][words_per_line]
-    time_t *** T_Access; // Time stamp for the access in the cache memory (used
+                         //    Cache [number_of_sets][cache_description.associativity]
+    time_t ** T_Access; // Time stamp for the access in the cache memory (used
                          //     in the LRU Algorithm)
-    time_t *** T_Load;   // Time stamp for the data load in the cache memory
+    time_t ** T_Load;   // Time stamp for the data load in the cache memory
                          //     (used in the FIFO Algorithm)
 } Cache;
 
