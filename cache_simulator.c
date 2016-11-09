@@ -51,7 +51,7 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
     return -1;                           // Upper inside of the set not found
 }
 
-/** This functions verifies if are or aren't free blocks (lines) available in
+/** This function verifies if are or aren't free blocks (lines) available in
   *     a set (by index1) in the cache memory.
   * @return: 1 (There are free space in the set by index1), -1 if not
   */
@@ -65,6 +65,19 @@ int there_Are_Space_Set(Cache cache1, int index1, int associativity) {
     return -1;
 }
 
+/** This function gives a block (line) free in a set (by index1) of the cache
+  *     memory with no particular order. It returns the first block (position of line)
+  *      free found, independent of its positon at the set.
+  */
+int random_free_space_set (Cache cache1, int index1, int associativity) {
+    int block_i;
+    for (block_i=0; block_i<associativity; block_i++) {
+        if (cache1.Cache_Upper[index1][block_i]==0 && cache1.Cache_Data[index1][block_i]==0) {
+            return block_i;
+        }
+    }
+    return -1; // None block free to be filled
+}
 void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line)
