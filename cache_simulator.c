@@ -13,6 +13,7 @@
 #include <time.h>                      // For the time stamp stuff
 #define DEBUG 0                        // 0: FALSE, 1:TRUE
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
+#define DATA 1
 
 /**************************** Functions ***************************************/
 /**
@@ -53,16 +54,16 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
 
 /** This function verifies if are or aren't free blocks (lines) available in
   *     a set (by index1) in the cache memory.
-  * @return: 1 (There are free space in the set by index1), -1 if not
+  * @return: 1 if not (set is full), -1 (There are free space in the set by index1)
   */
 int there_Are_Space_Set(Cache cache1, int index1, int associativity) {
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
         if (cache1.Cache_Upper[index1][block_i]==0 && cache1.Cache_Data[index1][block_i]==0) {
-            return 1;
+            return -1;
         }
     }
-    return -1;
+    return 1;
 }
 
 /** This function gives a block (line) free in a set (by index1) of the cache
@@ -80,10 +81,10 @@ int random_free_space_set (Cache cache1, int index1, int associativity) {
 }
 void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
     /** Writing the data in the set (by index) in the position that contains the
-      *     upper (by line)
+      *     upper (by line).
       */
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-    if (position_that_has_this_upper == -1) {
+    if (position_that_has_this_upper == -1) { // position with the right upper was not found (Wrhite Miss)
         /** None position contains a line with the solicited upper.
           * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
           * If it still a place in the cache, it's enough to draft one of free
@@ -92,26 +93,39 @@ void write_cache (Cache cache1, Results *result1, int index1, long unsigned line
           *     used the function there_Are_Space_Set(...).
           */
         result1->write_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        cache1.T_Access[index1][0] = tv.tv_usec; // Up
-        cache1.T_Load[index1][0] = tv.tv_usec;
-        //printf("write_misses: %d\n", result1->write_misses);
+
+        /** It is necessary to know if the set is full (it will use FIFO or LRU
+          *     replacement policy) or not.
+          */
+        int is_full = there_Are_Space_Set(cache1, index1, associativity);
+        if (is_full == 1){
+            int csont=0;
+        }
+        else {                  // There are a free block in the set (by index1)
+            int free_block = random_free_space_set (cache1, index1, associativity);
+            cache1.Cache_Data[index1][free_block] = DATA;
+            struct timeval tv;
+            gettimeofday(&tv, NULL);
+            cache1.T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
+            cache1.T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
+        }
+
     }
-    else { // position with the right upper was found
+    else {               // position with the right upper was found (Wrhite Hit)
         /** The position with the upper was found in the passed set (index1)
          *     The T_Access and T_Load is updated in this case, because a number_of_writes
          *     data is writed in a position at the set in cache that already have
          *     an another data.
          */
-        cache1.Cache_Data[index1][position_that_has_this_upper] = 1; // Write the "new" data in the right position at the cache memory
+        result1->write_hits++;
+        cache1.Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
 
         struct timeval tv;
         gettimeofday(&tv, NULL);
 
         cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
         cache1.T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
-        result1->write_hits++;
+
         //printf("to do write hit\n");
     }
 }
