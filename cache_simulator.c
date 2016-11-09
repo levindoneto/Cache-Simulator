@@ -16,7 +16,7 @@
 
 /**************************** Functions ***************************************/
 /**
- * That function get the line (upper) of a given address by the CPU
+ * This function get the line (upper) of a given address by the CPU
  * This upper is equal to the Tag information
  */
 int make_upper(long unsigned address, int words_per_line, int bytes_per_word) {
@@ -26,7 +26,7 @@ int make_upper(long unsigned address, int words_per_line, int bytes_per_word) {
 }
 
 /**
- * That function generates the index for the set in the cache
+ * This function generates the index for the set in the cache
  */
 int make_index (int number_of_sets, long unsigned upper) {
     int index;
@@ -37,6 +37,9 @@ int make_index (int number_of_sets, long unsigned upper) {
     return index;                               // index of the set in the cache
 }
 
+/**
+ * This function give the position in a set (by index) of a line with a determined upper
+ */
 int getPosUpper (Cache cache, int index, long unsigned line, int associativity) {
     int block_i;
     //printf("INDEX POS UPPER %d, ASSOC: %d, LINE: %lu\n", index, associativity, line);
@@ -45,8 +48,21 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
             return block_i;               // Upper inside of the set found
         }
     }
-
     return -1;                           // Upper inside of the set not found
+}
+
+/** This functions verifies if are or aren't free blocks (lines) available in
+  *     a set (by index1) in the cache memory.
+  * @return: 1 (There are free space in the set by index1), -1 if not
+  */
+int there_Are_Space_Set(Cache cache1, int index1, int associativity) {
+    int block_i;
+    for (block_i=0; block_i<associativity; block_i++) {
+        if (cache1.Cache_Upper[index1][block_i]==0 && cache1.Cache_Data[index1][block_i]==0) {
+            return 1;
+        }
+    }
+    return -1;
 }
 
 void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
@@ -55,7 +71,7 @@ void write_cache (Cache cache1, Results *result1, int index1, long unsigned line
       */
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     if (position_that_has_this_upper == -1) {
-        /** Any position contains a line with the solicited upper.
+        /** None position contains a line with the solicited upper.
           * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
           * If it still a place in the cache, it's enough to draft one of free
           *     lines to put the new upper and the "new" data.
@@ -85,9 +101,6 @@ void write_cache (Cache cache1, Results *result1, int index1, long unsigned line
         result1->write_hits++;
         //printf("to do write hit\n");
     }
-
-
-
 }
 
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
@@ -101,7 +114,7 @@ int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int as
 }
 
 /**
- * That function generates a formated output with the results of cache simulation
+ * This function generates a formated output with the results of cache simulation
  */
 void generate_output(Results cache_results){
     FILE *ptr_file_output;
