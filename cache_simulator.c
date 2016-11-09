@@ -1,9 +1,9 @@
 /**
- * --------------------------------------------------------------------------
- * Cache Simulator
- * Levindo Neto (https://github.com/levindoneto/Cache-Simulator)
- * --------------------------------------------------------------------------
- */
+  * --------------------------------------------------------------------------
+  * Cache Simulator
+  * Levindo Neto (https://github.com/levindoneto/Cache-Simulator)
+  * --------------------------------------------------------------------------
+  */
 #include <unistd.h>
 // Libraries
 #include <stdio.h>
@@ -46,51 +46,52 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
         }
     }
 
-    return -1;                              // Upper inside of the set not found
+    return -1;                           // Upper inside of the set not found
 }
 
 void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
-    // Writing the data in the set (by index) in the position that contains the
-    //     upper (by line)
-    //printf ("primeira posicao: %d", cache1.Cache_Data[0][0]);
+    /** Writing the data in the set (by index) in the position that contains the
+      *     upper (by line)
+      */
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     if (position_that_has_this_upper == -1) {
-        /* write_miss++ */
-        // Nenhuma posição possue uma linha com o upper solicitado
-        // Pode ser que a cache esteja cheia, dai tem que usar politica de substituicao
-        // Se ainda tinha lugar na cache basta sortear um dos espaços livres pra colocar a tag.
-        // Se nao ha local livre, dai tem que "substituir" (a substituicao nao ocorre de fato)
-        // o que acontece apenas e' que o T_Load e o T_Access sao atualizados o dado da linha
-        // Usa a int there_Are_Space_Set (cache1, index1) pra saber isso.
-
+        /** Any position contains a line with the solicited upper.
+          * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
+          * If it still a place in the cache, it's enough to draft one of free
+          *     lines to put the new upper and the "new" data.
+          * To know if are free places in the set (by index1) of cache, it is
+          *     used the function there_Are_Space_Set(...).
+          */
         result1->write_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        cache1.T_Access[index1][0] = tv.tv_usec; // Up
+        cache1.T_Load[index1][0] = tv.tv_usec;
         //printf("write_misses: %d\n", result1->write_misses);
     }
-    else {
-        // write_hit++
-        // The position with the upper was found in the passed set (index1)
-        //     The T_Access and T_Load is updated in this case, because a number_of_writes
-        //     data is writed in a position at the set in cache that already have
-        //     an another data.
+    else { // position with the right upper was found
+        /** The position with the upper was found in the passed set (index1)
+         *     The T_Access and T_Load is updated in this case, because a number_of_writes
+         *     data is writed in a position at the set in cache that already have
+         *     an another data.
+         */
+        cache1.Cache_Data[index1][position_that_has_this_upper] = 1; // Write the "new" data in the right position at the cache memory
+
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+
+        cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
+        cache1.T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
         result1->write_hits++;
         //printf("to do write hit\n");
     }
-    //printf("POSITION_LINE %d\n", position_that_has_this_upper);
-    //cache1.Cache_Upper
 
 
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    //cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
-    //cache1.T_Load
-    //cache1.Cache_Data[index1][position_that_has_this_upper] = data1;
-    //printf("\n>>>LOOK ME: %d\n", cache1.Cache_Data[index1][position_that_has_this_upper]);
+
 }
 
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-    //cache1.Cache_Upper
-    //Dirty_Bit
 
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -213,13 +214,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     /**************************************************************************/
 
-    /******************** Alloc space for Dirty Bit **************************
-    cache_mem.Dirty_Bit = malloc( number_of_sets * sizeof(int));
-    for (i=0; i<number_of_sets; i++) {
-        cache_mem.Dirty_Bit[i] = malloc (cache_description.associativity * sizeof(int));
-    }
-    *************************************************************************/
-
     /**************** Alloc space for Access Time Stamp************************/
     cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t));
     for (i=0; i<number_of_sets; i++) {
@@ -285,7 +279,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     cache_mem.Cache_Data  = NULL;  // "Free" in the memory for the Cache_Data[][]
     cache_mem.Cache_Upper = NULL;  // "Free" in the memory for the Cache_Upper[][]
-    //cache_mem.Dirty_Bit   = NULL;  // "Free" in the memory for the Dirty_Bit[][]
     cache_mem.T_Access    = NULL;  // "Free" in the memory for the T_Access[][]
     cache_mem.T_Load      = NULL;  // "Free" in the memory for the T_Load[][]
 

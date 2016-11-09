@@ -22,32 +22,28 @@ typedef struct desc {
 } Desc;
 
 typedef struct cache {
-    int    ** Cache_Data;  // The blocks are Cache_Data[set][line], with all words
-                           //    from the block.
-                           // Cache_Data [set][line], that's enough, because in
-                           //    case we don't need informations about word and
-                           //    all words have one byte, and the fourth position of
-                           //    the array would be for acess the bytes in a word
-                           //    Cache [number_of_sets][cache_description.associativity].
-                           // This data is modeled with a value 1 (there is data)
-                           //    and  0 (there isn't data) in the block.
-
-    long unsigned    ** Cache_Upper; // The informations about Upper is used to differentiate
-                           //    two or more blocks with the same set (index)
-                           //    information. Sets aren't ordered by upper or any
-                           //    particular order.
-
-    //int    ** Dirty_Bit; // That is used in the write back polocy for blocks
-                          //     modified only in the cache memory.
-                          //     DIRTY: 1, CLEAN: 0.
-
-    time_t ** T_Access;   // Time stamp for the access in the cache memory (used
-                          //     in the LRU Algorithm).
-
-    time_t ** T_Load;     // Time stamp for the data load in the cache memory
-                          //     (used in the FIFO Algorithm).
+    int    ** Cache_Data;  /** The blocks are Cache_Data[set][line], with all words
+                             *    from the block.
+                             * Cache_Data [set][line], that's enough, because in
+                             *    case we don't need informations about word and
+                             *    all words have one byte, and the fourth position of
+                             *    the array would be for acess the bytes in a word
+                             *    Cache [number_of_sets][cache_description.associativity].
+                             * This data is modeled with a value 1 (there is data)
+                             *    and  0 (there isn't data) in the block.
+                             */
+    long unsigned ** Cache_Upper; /** The informations about Upper is used to differentiate
+                                    *     two or more blocks with the same set (index)
+                                    *     information. Sets aren't ordered by upper or any
+                                    *     particular order.
+                                    */
+    time_t ** T_Access;      /** Time stamp for the access in the cache memory (used
+                               *     in the LRU Algorithm).
+                               */
+    time_t ** T_Load;        /** Time stamp for the data load in the cache memory
+                               *     (used in the FIFO Algorithm).
+                               */
 } Cache;
-
 /******************************************************************************/
 
 /************************ Prototypes of used functions ************************/
