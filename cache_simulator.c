@@ -41,11 +41,11 @@ int make_index (int number_of_sets, long unsigned upper) {
 /**
  * This function give the position in a set (by index) of a line with a determined upper
  */
-int getPosUpper (Cache cache, int index, long unsigned line, int associativity) {
+int getPosUpper (Cache *cache, int index, long unsigned line, int associativity) {
     int block_i;
     //printf("INDEX POS UPPER %d, ASSOC: %d, LINE: %lu\n", index, associativity, line);
     for (block_i=0; block_i<associativity; block_i++) {
-        if (cache.Cache_Upper[index][block_i] == line){
+        if (cache->Cache_Upper[index][block_i] == line){
             return block_i;               // Upper inside of the set found
         }
     }
@@ -56,10 +56,10 @@ int getPosUpper (Cache cache, int index, long unsigned line, int associativity) 
   *     a set (by index1) in the cache memory.
   * @return: 1 if not (set is full), -1 (There are free space in the set by index1)
   */
-int there_Are_Space_Set(Cache cache1, int index1, int associativity) {
+int there_Are_Space_Set(Cache *cache1, int index1, int associativity) {
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
-        if (cache1.Cache_Upper[index1][block_i]==0 && cache1.Cache_Data[index1][block_i]==0) {
+        if (cache1->Cache_Upper[index1][block_i]==0 && cache1->Cache_Data[index1][block_i]==0) {
             return -1;
         }
     }
@@ -70,16 +70,16 @@ int there_Are_Space_Set(Cache cache1, int index1, int associativity) {
   *     memory with no particular order. It returns the first block (position of line)
   *      free found, independent of its positon at the set.
   */
-int random_free_space_set (Cache cache1, int index1, int associativity) {
+int random_free_space_set (Cache *cache1, int index1, int associativity) {
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
-        if (cache1.Cache_Upper[index1][block_i]==0 && cache1.Cache_Data[index1][block_i]==0) {
+        if (cache1->Cache_Upper[index1][block_i]==0 && cache1->Cache_Data[index1][block_i]==0) {
             return block_i;
         }
     }
     return -1; // None block free to be filled
 }
-void write_cache (Cache cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
+void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line).
       */
@@ -97,17 +97,20 @@ void write_cache (Cache cache1, Results *result1, int index1, long unsigned line
         /** It is necessary to know if the set is full (it will use FIFO or LRU
           *     replacement policy) or not.
           */
+
         int is_full = there_Are_Space_Set(cache1, index1, associativity);
+
         if (is_full == 1){
             int csont=0;
         }
         else {                  // There are a free block in the set (by index1)
             int free_block = random_free_space_set (cache1, index1, associativity);
-            cache1.Cache_Data[index1][free_block] = DATA;
+
+            cache1->Cache_Data[index1][free_block] = DATA;
             struct timeval tv;
             gettimeofday(&tv, NULL);
-            cache1.T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
-            cache1.T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
+            cache1->T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
+            cache1->T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
         }
 
     }
@@ -118,19 +121,21 @@ void write_cache (Cache cache1, Results *result1, int index1, long unsigned line
          *     an another data.
          */
         result1->write_hits++;
-        cache1.Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
+        cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
 
         struct timeval tv;
         gettimeofday(&tv, NULL);
 
-        cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
-        cache1.T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
+        cache1->T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
+        cache1->T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
 
         //printf("to do write hit\n");
     }
 }
 
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
+    printf("TO DO\n");
+    /*
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
 
     struct timeval tv;
@@ -138,7 +143,9 @@ int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int as
     cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
     //cache1.T_Load
     return cache1.Cache_Data[index1][position_that_has_this_upper];
+    */
 }
+
 
 /**
  * This function generates a formated output with the results of cache simulation
@@ -241,28 +248,28 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     /**************** Alloc space for Cache Memory Data ***********************/
     int i, j;           // index for the allocation with the loop for
-    cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int));
+    cache_mem.Cache_Data = malloc( number_of_sets * sizeof(int *));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.Cache_Data[i] = malloc (cache_description.associativity * sizeof(int));
     }
     /**************************************************************************/
 
     /******************* Alloc space for Cache Upper **************************/
-    cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(long unsigned));
+    cache_mem.Cache_Upper = malloc( number_of_sets * sizeof(long unsigned *));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.Cache_Upper[i] = malloc (cache_description.associativity * sizeof(long unsigned));
     }
     /**************************************************************************/
 
     /**************** Alloc space for Access Time Stamp************************/
-    cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t));
+    cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t *));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.T_Access[i] = malloc (cache_description.associativity * sizeof(time_t));
     }
     /**************************************************************************/
 
     /**************** Alloc space for load Time Stamp************************/
-    cache_mem.T_Load = malloc( number_of_sets * sizeof(time_t));
+    cache_mem.T_Load = malloc( number_of_sets * sizeof(time_t *));
     for (i=0; i<number_of_sets; i++) {
         cache_mem.T_Load[i] = malloc (cache_description.associativity * sizeof(time_t));
     }
@@ -297,7 +304,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 index = make_index (number_of_sets, line);
                 //printf("INDEXXXX: %d\n", index);
                 number_of_writes++;
-                write_cache(cache_mem, &cache_results, index, line, data, cache_description.associativity);
+                write_cache(&cache_mem, &cache_results, index, line, data, cache_description.associativity);
             }
             else {
                 printf("\nUndefined operation request detected\n");
