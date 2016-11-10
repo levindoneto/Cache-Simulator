@@ -18,7 +18,7 @@ typedef struct desc {
     int line_size;                                   // Block size
     int number_of_lines;                             // Number of blocks
     int associativity;                               // Number of blocks per set
-    char replacement_policy[5];                      // LRY or FIFO + \0
+    char replacement_policy[5];                      // LRU or FIFO + \0
 } Desc;
 
 typedef struct cache {
@@ -54,7 +54,7 @@ int make_tag(int number_of_lines_of_cache, int associativity);
 int getPosUpper (Cache *cache, int index, long unsigned line, int associativity);
 int there_Are_Space_Set(Cache *cache1, int index1, int associativity);
 int random_free_space_set (Cache *cache1, int index1, int associativity);
-void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity);
+void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy);
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
 void generate_output(Results cache_results);
 /******************************************************************************/

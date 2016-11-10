@@ -23,14 +23,14 @@
 int startCache(Cache *cache1, int number_of_sets, int associativity) {
       int index_i, block_i;
       for (index_i=0; index_i<number_of_sets; index_i++) {
-        for (block_i=0; block_i<associativity; block_i++ ) {
-          cache1->Cache_Data[index_i][associativity]  = 0;
-          cache1->Cache_Upper[index_i][associativity] = 0;
-          cache1->T_Access[index_i][associativity]    = 0;
-          cache1->T_Load[index_i][associativity]      = 0;
+          for (block_i=0; block_i<associativity; block_i++ ) {
+              cache1->Cache_Data[index_i][associativity]  = 0;
+              cache1->Cache_Upper[index_i][associativity] = 0;
+              cache1->T_Access[index_i][associativity]    = 0;
+              cache1->T_Load[index_i][associativity]      = 0;
+          }
       }
-      }
-  return 0;
+return 0;
 }
 
 /**
@@ -71,7 +71,7 @@ int getPosUpper (Cache *cache, int index, long unsigned line, int associativity)
 
 /** This function verifies if are or aren't free blocks (lines) available in
   *     a set (by index1) in the cache memory.
-  * @return: 1 if not (set is full), -1 (There are free space in the set by index1)
+  * @return: 1 (set is full), -1 (There are free space in the set by index1)
   */
 int there_Are_Space_Set(Cache *cache1, int index1, int associativity) {
     int block_i;
@@ -97,10 +97,15 @@ int random_free_space_set (Cache *cache1, int index1, int associativity) {
     return -1; // None block free to be filled
 }
 
-void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
+void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line).
       */
+    char *lru  = "LRU\0";
+    char *fifo = "FIFO\0";
+    int is_full;
+    int rpl, rpf;
+    int free_block;
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     if (position_that_has_this_upper == -1) { // position with the right upper was not found (Wrhite Miss)
         /** None position contains a line with the solicited upper.
@@ -115,19 +120,29 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
         /** It is necessary to know if the set is full (it will use FIFO or LRU
           *     replacement policy) or not.
           */
+        is_full = there_Are_Space_Set(cache1, index1, associativity);
 
-        int is_full = there_Are_Space_Set(cache1, index1, associativity);
+        if (is_full == 1) {
+            rpl = strcmp(lru, replacement_policy);
+                if (rpl == 0) {
+                    printf ("TO DO LRU\n");
+                }
+            rpf = strcmp(fifo, replacement_policy);
+                if (rpf == 0) {
+                    printf ("TO DO FIFO\n");
+                }
 
-        if (is_full == 1){
-            int csont=0;
-        }
+            }
+
+            //printf(">>%s\n", replacement_policy);
+
         else {                  // There are a free block in the set (by index1)
-            int free_block = random_free_space_set (cache1, index1, associativity);
+            free_block = random_free_space_set (cache1, index1, associativity);
 
             cache1->Cache_Data[index1][free_block] = DATA;
 
-            //cache1->T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
-            //cache1->T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
+            cache1->T_Access[index1][free_block] += 1; // Update the T_Access
+            cache1->T_Load[index1][free_block] += 1;   // Update the T_Load
         }
 
     }
@@ -156,6 +171,7 @@ int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int as
     //cache1.T_Load
     return cache1.Cache_Data[index1][position_that_has_this_upper];
     */
+    return 0;
 }
 
 /**
@@ -301,7 +317,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 index = make_index (number_of_sets, line);
                 //printf("INDEXXXX: %d\n", index);
                 number_of_writes++;
-                write_cache(&cache_mem, &cache_results, index, line, data, cache_description.associativity);
+                write_cache(&cache_mem, &cache_results, index, line, data, cache_description.associativity, cache_description.replacement_policy);
             }
             else {
                 printf("\nUndefined operation request detected\n");
