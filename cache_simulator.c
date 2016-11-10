@@ -97,6 +97,17 @@ int random_free_space_set (Cache *cache1, int index1, int associativity) {
     return -1; // None block free to be filled
 }
 
+int findLessAccessTSset (Cache *cache1, int index1, int associativity) {
+    int block_i;
+    int lessAc = cache1->T_Access[index1][0];
+    for (block_i=0; block_i<associativity; block_i++) {
+        if (cache1->T_Access[index1][block_i] < cache1->T_Access[index1][block_i+1]) { // b < b+1
+            lessAc = block_i;
+        }
+    }
+    return lessAc; // Position when is the less T_Access in the set (by index)
+}
+
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line).
@@ -106,7 +117,9 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
     int is_full;
     int rpl, rpf;
     int free_block;
+    int l=0, f=0;   // Position of the less counter for LRU(l) and FIFO(f)
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
+    //printf("LINE1: %lu no INDEX: %d\n", line1, index1);
     if (position_that_has_this_upper == -1) { // position with the right upper was not found (Wrhite Miss)
         /** None position contains a line with the solicited upper.
           * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
@@ -123,16 +136,22 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
         is_full = there_Are_Space_Set(cache1, index1, associativity);
 
         if (is_full == 1) {
+            // LRU
             rpl = strcmp(lru, replacement_policy);
-                if (rpl == 0) {
-                    printf ("TO DO LRU\n");
+            if (rpl == 0) { // It's LRU
+                l = findLessAccessTSset(cache1, index1, associativity);
+                //printf("LESS: %d in the INDEX %d with ASSOC %d\n", l, index1, associativity);
+                cache1->Cache_Upper[index1][l] = line1; // line1 = upper
+                // ...
+                printf ("TO DO LRU\n");
                 }
+            // FIFO
             rpf = strcmp(fifo, replacement_policy);
-                if (rpf == 0) {
-                    printf ("TO DO FIFO\n");
-                }
-
+            if (rpf == 0) {// It's LRU
+                printf ("TO DO FIFO\n");
             }
+
+        }
 
             //printf(">>%s\n", replacement_policy);
 
