@@ -37,16 +37,17 @@ typedef struct cache {
                                     *     information. Sets aren't ordered by upper or any
                                     *     particular order.
                                     */
-    time_t ** T_Access;      /** Time stamp for the access in the cache memory (used
-                               *     in the LRU Algorithm).
-                               */
-    time_t ** T_Load;        /** Time stamp for the data load in the cache memory
-                               *     (used in the FIFO Algorithm).
-                               */
+    long unsigned ** T_Access;      /** Time stamp (Used a counter) for the access
+                                      *     in the cache memory (usedin the LRU Algorithm).
+                                      */
+    long unsigned ** T_Load;        /** Time stamp (Used a counter) for the data
+                                      *     load in the cache memory(used in the FIFO Algorithm).
+                                      */
 } Cache;
 /******************************************************************************/
 
 /************************ Prototypes of used functions ************************/
+int startCache(Cache *cache1, int number_of_sets, int associativity);
 int make_upper(long unsigned address, int words_per_line, int bytes_per_word);
 int make_index(int number_of_lines_of_cache, long unsigned upper);
 int make_tag(int number_of_lines_of_cache, int associativity);

@@ -16,6 +16,23 @@
 #define DATA 1
 
 /**************************** Functions ***************************************/
+
+/**
+ * This function makes the start of all cache with zeros.
+ */
+int startCache(Cache *cache1, int number_of_sets, int associativity) {
+      int index_i, block_i;
+      for (index_i=0; index_i<number_of_sets; index_i++) {
+        for (block_i=0; block_i<associativity; block_i++ ) {
+          cache1->Cache_Data[index_i][associativity]  = 0;
+          cache1->Cache_Upper[index_i][associativity] = 0;
+          cache1->T_Access[index_i][associativity]    = 0;
+          cache1->T_Load[index_i][associativity]      = 0;
+      }
+      }
+  return 0;
+}
+
 /**
  * This function get the line (upper) of a given address by the CPU
  * This upper is equal to the Tag information
@@ -79,6 +96,7 @@ int random_free_space_set (Cache *cache1, int index1, int associativity) {
     }
     return -1; // None block free to be filled
 }
+
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line).
@@ -107,10 +125,9 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
             int free_block = random_free_space_set (cache1, index1, associativity);
 
             cache1->Cache_Data[index1][free_block] = DATA;
-            struct timeval tv;
-            gettimeofday(&tv, NULL);
-            cache1->T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
-            cache1->T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
+
+            //cache1->T_Access[index1][free_block] = tv.tv_usec; // Update the T_Access
+            //cache1->T_Load[index1][free_block] = tv.tv_usec;   // Update the T_Load
         }
 
     }
@@ -123,11 +140,8 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
         result1->write_hits++;
         cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
 
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-
-        cache1->T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
-        cache1->T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
+        //cache1->T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
+        //cache1->T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
 
         //printf("to do write hit\n");
     }
@@ -138,14 +152,11 @@ int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int as
     /*
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
 
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
     cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
     //cache1.T_Load
     return cache1.Cache_Data[index1][position_that_has_this_upper];
     */
 }
-
 
 /**
  * This function generates a formated output with the results of cache simulation
@@ -172,22 +183,6 @@ void generate_output(Results cache_results){
 
 int main(int argc, char **argv)               // Files are passed by a parameter
 {
-
-    /* Getting time stamp in microseconds (used in LRU and FIFO replacement policy) */
-    struct timeval tv;
-    time_t curtime;
-
-    gettimeofday(&tv, NULL);
-    curtime=tv.tv_usec;
-
-    //printf("TEMPO: %ld\n", (long int) curtime);
-
-    sleep(2);
-    gettimeofday(&tv, NULL);
-    curtime=tv.tv_usec;
-    //printf("TEMPO 2: %ld\n", (long int) curtime);
-    /**************************************************************************/
-
     printf("\n*** Cache Simulator ***\n");
     //printf("TIME1%lld\n", (long long) time(NULL));
 
@@ -262,18 +257,20 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     /**************** Alloc space for Access Time Stamp************************/
-    cache_mem.T_Access = malloc( number_of_sets * sizeof(time_t *));
+    cache_mem.T_Access = malloc( number_of_sets * sizeof(long unsigned *));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Access[i] = malloc (cache_description.associativity * sizeof(time_t));
+        cache_mem.T_Access[i] = malloc (cache_description.associativity * sizeof(long unsigned));
     }
     /**************************************************************************/
 
     /**************** Alloc space for load Time Stamp************************/
-    cache_mem.T_Load = malloc( number_of_sets * sizeof(time_t *));
+    cache_mem.T_Load = malloc( number_of_sets * sizeof(long unsigned *));
     for (i=0; i<number_of_sets; i++) {
-        cache_mem.T_Load[i] = malloc (cache_description.associativity * sizeof(time_t));
+        cache_mem.T_Load[i] = malloc (cache_description.associativity * sizeof(long unsigned));
     }
     /**************************************************************************/
+
+    startCache(&cache_mem, number_of_sets, cache_description.associativity);
 
     /***************** Input Trace File and simulation ************************/
 
