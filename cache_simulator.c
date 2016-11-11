@@ -32,7 +32,7 @@ int startCache(Cache *cache1, int number_of_sets, int associativity) {
               cache1->T_Load[index_i][associativity]      = 0;
           }
       }
-return 0;
+      return 0;
 }
 
 /**
@@ -109,7 +109,6 @@ int findLessAccessTSset (Cache *cache1, int index1, int associativity) {
         if (cache1->T_Access[index1][block_i] < lessAc) { // b < b+1
             lessAc = cache1->T_Access[index1][block_i];
             p_lessAc = block_i;
-
         }
     }
     return p_lessAc;
@@ -127,7 +126,6 @@ int findLessLoadTSset (Cache *cache1, int index1, int associativity) {
     }
     return p_lessLd;
 }
-
 
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Writing the data in the set (by index) in the position that contains the
@@ -151,7 +149,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
           * To know if are free places in the set (by index1) of cache, it is
           *     used the function there_Are_Space_Set(...).
           */
-        result1->write_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
+        result1->read_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
 
         /** It is necessary to know if the set is full (it will use FIFO or LRU
           *     replacement policy) or not.
@@ -160,7 +158,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
 
         /*************************** Set is full /*****************************/
         if (is_full == 1) {
-            printf("FICOU CHEIO O SET %d\n", index1);
+            //printf("SET FULL: %d\n", index1);
             // *** LRU ***
             rpl = strcmp(lru, replacement_policy);
             if (rpl == 0) { // It's LRU
@@ -192,8 +190,8 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
             free_block = random_free_space_set (cache1, index1, associativity);
 
             cache1->Cache_Data[index1][free_block] = DATA;
-            cache1->T_Access[index1][free_block] += 1; // Update the T_Access
-            cache1->T_Load[index1][free_block] += 1;   // Update the T_Load
+            cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
+            cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
         }
     }
     /**************************************************************************/
@@ -205,25 +203,15 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
          *     data is writed in a position at the set in cache that already have
          *     an another data.
          */
-        result1->write_hits++;
+        result1->read_hits++;
         cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
 
-        //cache1->T_Access[index1][position_that_has_this_upper] = tv.tv_usec; // Up
-        //cache1->T_Load[index1][position_that_has_this_upper] = tv.tv_usec;
-
-        //printf("to do write hit\n");
+        cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
+        cache1->T_Load[index1][position_that_has_this_upper] = currently_clk;   // Update the T_Load
     }
 }
 
 int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
-    printf("TO DO\n");
-    /*
-    int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-
-    cache1.T_Access[index1][position_that_has_this_upper] = tv.tv_usec;
-    //cache1.T_Load
-    return cache1.Cache_Data[index1][position_that_has_this_upper];
-    */
     return 0;
 }
 
