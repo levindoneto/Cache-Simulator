@@ -56,6 +56,6 @@ int there_Are_Space_Set(Cache *cache1, int index1, int associativity);
 int random_free_space_set (Cache *cache1, int index1, int associativity);
 int findLessAccessTSset (Cache *cache1, int index1, int associativity);
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy);
-int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity);
+int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy);
 void generate_output(Results cache_results);
 /******************************************************************************/

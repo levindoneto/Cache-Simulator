@@ -149,7 +149,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
           * To know if are free places in the set (by index1) of cache, it is
           *     used the function there_Are_Space_Set(...).
           */
-        result1->read_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
+        result1->write_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
 
         /** It is necessary to know if the set is full (it will use FIFO or LRU
           *     replacement policy) or not.
@@ -203,7 +203,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
          *     data is writed in a position at the set in cache that already have
          *     an another data.
          */
-        result1->read_hits++;
+        result1->write_hits++;
         cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
 
         cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
@@ -211,8 +211,86 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
     }
 }
 
-int read_cache (Cache cache1, int index1, long unsigned line1, int data1, int associativity) {
-    return 0;
+int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
+    /** Reading the data in the set (by index) in the position that contains the
+      *     upper (by line).
+      */
+    char *lru  = "LRU\0";
+    char *fifo = "FIFO\0";
+    int is_full;
+    int rpl, rpf;
+    int free_block;
+    int p_lAc, p_lLd;   // Position of the less counter for LRU(l) and FIFO(f)
+    int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
+    //printf("LINE1: %lu no INDEX: %d\n", line1, index1);
+
+    /****************************** Write Miss ********************************/
+    if (position_that_has_this_upper == -1) { // position with the right upper was not found
+        /** None position contains a line with the solicited upper.
+          * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
+          * If it still a place in the cache, it's enough to draft one of free
+          *     lines to put the new upper and the "new" data.
+          * To know if are free places in the set (by index1) of cache, it is
+          *     used the function there_Are_Space_Set(...).
+          */
+        result1->read_misses++; // (*result1).write_misses++  this points to the cache_mem in the main
+
+        /** It is necessary to know if the set is full (it will use FIFO or LRU
+          *     replacement policy) or not.
+          */
+        is_full = there_Are_Space_Set(cache1, index1, associativity);
+
+        /*************************** Set is full /*****************************/
+        if (is_full == 1) {
+            //printf("SET FULL: %d\n", index1);
+            // *** LRU ***
+            rpl = strcmp(lru, replacement_policy);
+            if (rpl == 0) { // It's LRU
+                //printf ("index que vem: %d e associativity que vem: %d\n", index1, associativity);
+                p_lAc = findLessAccessTSset(cache1, index1, associativity);
+                //printf("LESS: %d in the INDEX %d with ASSOC %d\n", l, index1, associativity);
+                //printf ("p_lAc: %d\n", p_lAc);
+                cache1->Cache_Upper[index1][p_lAc] = line1; // line1 = upper
+                cache1->Cache_Data[index1][p_lAc] = DATA;
+                cache1->T_Access[index1][p_lAc] = currently_clk;  // Update T_Access
+                cache1->T_Load[index1][p_lAc]   = currently_clk ; // Update T_Load
+            }
+            // *** FIFO ***
+            rpf = strcmp(fifo, replacement_policy);
+            if (rpf == 0) { // It's LRU
+                p_lLd = findLessLoadTSset(cache1, index1, associativity);
+                printf("Free line: %d in the set: %d\n", p_lLd, index1);
+                cache1->Cache_Upper[index1][p_lLd] = line1;
+                cache1->Cache_Data[index1][p_lLd] = DATA;
+                cache1->T_Access[index1][p_lLd] = currently_clk; // Update T_Access
+                cache1->T_Load[index1][p_lLd] = currently_clk;   // Update T_Load
+            }
+
+        }
+        /**********************************************************************/
+
+        /************************** Set isn't full /***************************/
+        else {                  // There are a free block in the set (by index1)
+            free_block = random_free_space_set (cache1, index1, associativity);
+
+            cache1->Cache_Data[index1][free_block] = DATA;
+            cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
+            cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
+        }
+    }
+    /**************************************************************************/
+
+    /****************************** Read Hit ********************************/
+    else {               // position with the right upper was found
+        /** The position with the upper was found in the passed set (index1)
+         *     The T_Access and T_Load is updated in this case, because a number_of_writes
+         *     data is writed in a position at the set in cache that already have
+         *     an another data.
+         */
+        result1->read_hits++;
+        cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
+
+    }
 }
 
 /**
@@ -356,7 +434,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
                 #endif
 
                 number_of_reads++;
-                //read_cache(cache_mem, index, line, data, cache_description.associativity);
+                read_cache(&cache_mem, &cache_results, index, line, data, cache_description.associativity, cache_description.replacement_policy);
             }
             else if (RorW == 'W'){
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
