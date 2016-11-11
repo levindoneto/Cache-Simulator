@@ -15,6 +15,8 @@
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 #define DATA 1
 
+int clk=0;                             // To simulate a clock with a counter
+
 /**************************** Functions ***************************************/
 
 /**
@@ -98,15 +100,34 @@ int random_free_space_set (Cache *cache1, int index1, int associativity) {
 }
 
 int findLessAccessTSset (Cache *cache1, int index1, int associativity) {
+    //printf ("find: CHEGUEI, E CHEGUEI NO INDEX %d COM ASSOC:  %d\n", index1, associativity);
     int block_i;
-    int lessAc = cache1->T_Access[index1][0];
-    for (block_i=0; block_i<associativity; block_i++) {
-        if (cache1->T_Access[index1][block_i] < cache1->T_Access[index1][block_i+1]) { // b < b+1
-            lessAc = block_i;
+    int p_lessAc=0; // Position when is the less T_Access in the set (by index)
+    long unsigned lessAc = cache1->T_Access[index1][0];
+    for (block_i=0; block_i<associativity; ++block_i) {
+        //printf("lacc: %lu int the index %d\n", lessAc, index1);
+        if (cache1->T_Access[index1][block_i] < lessAc) { // b < b+1
+            lessAc = cache1->T_Access[index1][block_i];
+            p_lessAc = block_i;
+
         }
     }
-    return lessAc; // Position when is the less T_Access in the set (by index)
+    return p_lessAc;
 }
+
+int findLessLoadTSset (Cache *cache1, int index1, int associativity) {
+    int block_i;
+    int p_lessLd=0; // Position when is the less T_Access in the set (by index)
+    long unsigned lessLd = cache1->T_Load[index1][0];
+    for (block_i=0; block_i<associativity; ++block_i) {
+        if (cache1->T_Load[index1][block_i] < lessLd) { // b < b+1
+            lessLd = cache1->T_Load[index1][block_i];
+            p_lessLd = block_i;
+        }
+    }
+    return p_lessLd;
+}
+
 
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Writing the data in the set (by index) in the position that contains the
@@ -117,10 +138,12 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
     int is_full;
     int rpl, rpf;
     int free_block;
-    int l=0, f=0;   // Position of the less counter for LRU(l) and FIFO(f)
+    int p_lAc, p_lLd;   // Position of the less counter for LRU(l) and FIFO(f)
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     //printf("LINE1: %lu no INDEX: %d\n", line1, index1);
-    if (position_that_has_this_upper == -1) { // position with the right upper was not found (Wrhite Miss)
+
+    /****************************** Write Miss ********************************/
+    if (position_that_has_this_upper == -1) { // position with the right upper was not found
         /** None position contains a line with the solicited upper.
           * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
           * If it still a place in the cache, it's enough to draft one of free
@@ -135,37 +158,46 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
           */
         is_full = there_Are_Space_Set(cache1, index1, associativity);
 
+        /*************************** Set is full /*****************************/
         if (is_full == 1) {
             // LRU
             rpl = strcmp(lru, replacement_policy);
             if (rpl == 0) { // It's LRU
-                l = findLessAccessTSset(cache1, index1, associativity);
+                //printf ("index que vem: %d e associativity que vem: %d\n", index1, associativity);
+                p_lAc = findLessAccessTSset(cache1, index1, associativity);
                 //printf("LESS: %d in the INDEX %d with ASSOC %d\n", l, index1, associativity);
-                cache1->Cache_Upper[index1][l] = line1; // line1 = upper
-                // ...
-                printf ("TO DO LRU\n");
+                //printf ("p_lAc: %d\n", p_lAc);
+                cache1->Cache_Upper[index1][p_lAc] = line1; // line1 = upper
+                cache1->Cache_Data[index1][p_lAc] = DATA;
+
+                //cache1->T_Access[index1][0] += 1;  // cache1->T_Access[index1][0] = clock_ext;
+                //cache1->T_Load[index1][0] +=1 ;    // cache1->T_Load[index1][0] = clock_ext;
+
                 }
             // FIFO
             rpf = strcmp(fifo, replacement_policy);
             if (rpf == 0) {// It's LRU
+                p_lLd = findLessLoadTSset(cache1, index1, associativity);
+                cache1->Cache_Upper[index1][p_lLd] = line1;
                 printf ("TO DO FIFO\n");
             }
 
         }
+        /**********************************************************************/
 
-            //printf(">>%s\n", replacement_policy);
-
+        /************************** Set isn't full /***************************/
         else {                  // There are a free block in the set (by index1)
             free_block = random_free_space_set (cache1, index1, associativity);
 
             cache1->Cache_Data[index1][free_block] = DATA;
-
             cache1->T_Access[index1][free_block] += 1; // Update the T_Access
             cache1->T_Load[index1][free_block] += 1;   // Update the T_Load
         }
-
     }
-    else {               // position with the right upper was found (Wrhite Hit)
+    /**************************************************************************/
+
+    /****************************** Write Hit ********************************/
+    else {               // position with the right upper was found
         /** The position with the upper was found in the passed set (index1)
          *     The T_Access and T_Load is updated in this case, because a number_of_writes
          *     data is writed in a position at the set in cache that already have
@@ -309,6 +341,10 @@ int main(int argc, char **argv)               // Files are passed by a parameter
 
     /***************** Input Trace File and simulation ************************/
 
+    // long unsigned as = make_upper(2147483647, words_per_line, BYTES_PER_WORD);
+    // printf("The upper: %lu\n", as);
+
+
     ptr_file_input = fopen(input, "rb");
     if (!ptr_file_input) {
         printf("\nThe file of Input is unable to open!\n\n");
@@ -316,6 +352,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     else {
         while (fscanf(ptr_file_input, "%lu %c\n", &address, &RorW) != EOF){
+            clk += 1;                                     // Increment the clock
             //printf("ADDRESS: %lu e RW: %c\n", address, RorW);
             cache_results.acess_count++;
             if (RorW == 'R') {
@@ -360,7 +397,6 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     cache_mem.Cache_Upper = NULL;  // "Free" in the memory for the Cache_Upper[][]
     cache_mem.T_Access    = NULL;  // "Free" in the memory for the T_Access[][]
     cache_mem.T_Load      = NULL;  // "Free" in the memory for the T_Load[][]
-
 
     fclose(ptr_file_input);                 // Close the input file (trace file)
 
