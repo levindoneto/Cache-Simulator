@@ -15,7 +15,7 @@
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 #define DATA 1
 
-int clk=0;                             // To simulate a clock with a counter
+int currently_clk=0;                   // To simulate a clock with a counter
 
 /**************************** Functions ***************************************/
 
@@ -160,7 +160,8 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
 
         /*************************** Set is full /*****************************/
         if (is_full == 1) {
-            // LRU
+            printf("FICOU CHEIO O SET %d\n", index1);
+            // *** LRU ***
             rpl = strcmp(lru, replacement_policy);
             if (rpl == 0) { // It's LRU
                 //printf ("index que vem: %d e associativity que vem: %d\n", index1, associativity);
@@ -169,17 +170,18 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
                 //printf ("p_lAc: %d\n", p_lAc);
                 cache1->Cache_Upper[index1][p_lAc] = line1; // line1 = upper
                 cache1->Cache_Data[index1][p_lAc] = DATA;
-
-                //cache1->T_Access[index1][0] += 1;  // cache1->T_Access[index1][0] = clock_ext;
-                //cache1->T_Load[index1][0] +=1 ;    // cache1->T_Load[index1][0] = clock_ext;
-
-                }
-            // FIFO
+                cache1->T_Access[index1][p_lAc] = currently_clk;  // Update T_Access
+                cache1->T_Load[index1][p_lAc]   = currently_clk ; // Update T_Load
+            }
+            // *** FIFO ***
             rpf = strcmp(fifo, replacement_policy);
-            if (rpf == 0) {// It's LRU
+            if (rpf == 0) { // It's LRU
                 p_lLd = findLessLoadTSset(cache1, index1, associativity);
+                printf("Free line: %d in the set: %d\n", p_lLd, index1);
                 cache1->Cache_Upper[index1][p_lLd] = line1;
-                printf ("TO DO FIFO\n");
+                cache1->Cache_Data[index1][p_lLd] = DATA;
+                cache1->T_Access[index1][p_lLd] = currently_clk; // Update T_Access
+                cache1->T_Load[index1][p_lLd] = currently_clk;   // Update T_Load
             }
 
         }
@@ -352,7 +354,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     }
     else {
         while (fscanf(ptr_file_input, "%lu %c\n", &address, &RorW) != EOF){
-            clk += 1;                                     // Increment the clock
+            currently_clk += 1;                                     // Increment the clock
             //printf("ADDRESS: %lu e RW: %c\n", address, RorW);
             cache_results.acess_count++;
             if (RorW == 'R') {
