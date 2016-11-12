@@ -188,7 +188,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
         /************************** Set isn't full /***************************/
         else {                  // There are a free block in the set (by index1)
             free_block = random_free_space_set (cache1, index1, associativity);
-
+            cache1->Cache_Upper[index1][free_block] = line1; // line1 = upper
             cache1->Cache_Data[index1][free_block] = DATA;
             cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
             cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
@@ -205,7 +205,6 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
          */
         result1->write_hits++;
         cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
-
         cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
         cache1->T_Load[index1][position_that_has_this_upper] = currently_clk;   // Update the T_Load
     }
@@ -272,7 +271,7 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
         /************************** Set isn't full /***************************/
         else {                  // There are a free block in the set (by index1)
             free_block = random_free_space_set (cache1, index1, associativity);
-
+            cache1->Cache_Upper[index1][free_block] = line1; // line1 = upper
             cache1->Cache_Data[index1][free_block] = DATA;
             cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
             cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
@@ -296,9 +295,9 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
 /**
  * This function generates a formated output with the results of cache simulation
  */
-void generate_output(Results cache_results){
+void generate_output(Results cache_results, char *output_name){
     FILE *ptr_file_output;
-    ptr_file_output=fopen("output.out", "wb");
+    ptr_file_output=fopen(output_name, "wb");
     //char output_file[11] = "output.out";
 
     if (!ptr_file_output) {
@@ -333,10 +332,10 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     cache_results.write_misses = 0;
 
     char *description = argv[1];
-    char *input = argv[2];
+    char *input       = argv[2];
+    char *output      = argv[3];
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
-    FILE *ptr_file_output;
     char RorW;                  // Read or Write (address)
     int number_of_reads = 0;    // Number of read request operations by the CPU
     int number_of_writes = 0;   // Number of write request operations by the CPU
@@ -458,7 +457,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     /****************************** Output ************************************/
-    generate_output(cache_results);
+    generate_output(cache_results, output);
     /**************************************************************************/
 
     cache_mem.Cache_Data  = NULL;  // "Free" in the memory for the Cache_Data[][]
