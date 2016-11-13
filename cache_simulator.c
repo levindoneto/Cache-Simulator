@@ -12,6 +12,7 @@
 #include <string.h>
 #include <time.h>                      // For the time stamp stuff
 #define DEBUG 0                        // 0: FALSE, 1:TRUE
+#define DEBUG 0                        // 1: print the currently cache (data and upper), 0: do not print
 #define BYTES_PER_WORD 1               // All words with 1 Byte (bytes_per_word)
 #define DATA 1
 
@@ -75,10 +76,12 @@ int getPosUpper (Cache *cache, int index, long unsigned line, int associativity)
   *     a set (by index1) in the cache memory.
   * @return: 1 (set is full), -1 (There are free space in the set by index1)
   */
-int there_Are_Space_Set(Cache *cache1, int index1, int associativity) { 
+int there_Are_Space_Set(Cache *cache1, int index1, int associativity) {
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
-        if (cache1->Cache_Upper[index1][block_i]==0) {  //  && cache1->Cache_Data[index1][block_i]==0  I DON'T HOW TU USE DATA/VALID INFORMATIONS!!!!
+        //printf("block data: %d e posicao: %d\n", cache1->Cache_Data[index1][block_i], block_i);
+        if (cache1->Cache_Data[index1][block_i]==0) {  // cache1->Cache_Upper[index1][block_i]==0 &&   I DON'T HOW TU USE DATA/VALID INFORMATIONS!!!!
+            //printf ("BLOCO QUE NAO TEM NADA: %d\n", block_i);
             return -1;
         }
     }
@@ -92,8 +95,10 @@ int there_Are_Space_Set(Cache *cache1, int index1, int associativity) {
 int random_free_space_set (Cache *cache1, int index1, int associativity) {
     int block_i;
     for (block_i=0; block_i<associativity; block_i++) {
-        printf("LONG NA FREE SPACE: %lu", cache1->Cache_Upper[index1][block_i]);     
-        if (cache1->Cache_Upper[index1][block_i]==0) {  //  && cache1->Cache_Data[index1][block_i]==0
+        //printf("UPPER FROM FREE SPACE: %lu no index %d COM DATA = %d\n", cache1->Cache_Upper[index1][block_i], index1, cache1->Cache_Data[index1][block_i]);
+        //printf("block_i befor: %d at the index %d\n\n", block_i, index1);
+        if (cache1->Cache_Data[index1][block_i]==0) {  //  && cache1->Cache_Upper[index1][block_i]==0 &&
+            //printf("FOUND THE MODIFIED: block_i: %d at the index %d\n\n", block_i, index1);
             return block_i;
         }
     }
@@ -105,7 +110,7 @@ int findLessAccessTSset (Cache *cache1, int index1, int associativity) {
     int block_i;
     int p_lessAc=0; // Position when is the less T_Access in the set (by index)
     long unsigned lessAc = cache1->T_Access[index1][0];
-    for (block_i=0; block_i<associativity; ++block_i) {
+    for (block_i=0; block_i<associativity; block_i++) {
         //printf("lacc: %lu int the index %d\n", lessAc, index1);
         if (cache1->T_Access[index1][block_i] < lessAc) { // b < b+1
             lessAc = cache1->T_Access[index1][block_i];
@@ -119,7 +124,7 @@ int findLessLoadTSset (Cache *cache1, int index1, int associativity) {
     int block_i;
     int p_lessLd=0; // Position when is the less T_Access in the set (by index)
     long unsigned lessLd = cache1->T_Load[index1][0];
-    for (block_i=0; block_i<associativity; ++block_i) {
+    for (block_i=0; block_i<associativity; block_i++) {
         if (cache1->T_Load[index1][block_i] < lessLd) { // b < b+1
             lessLd = cache1->T_Load[index1][block_i];
             p_lessLd = block_i;
@@ -131,17 +136,17 @@ int findLessLoadTSset (Cache *cache1, int index1, int associativity) {
 void write_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Writing the data in the set (by index) in the position that contains the
       *     upper (by line).
-      */   
-    //printf("line1: %lu in the set %d\n", line1, index1);    
+      */
+    //printf("line1: %lu in the set %d\n", line1, index1);
     char *lru  = "LRU\0";
     char *fifo = "FIFO\0";
     int is_full;
     int rpl, rpf;
     int free_block;
     int p_lAc, p_lLd;   // Position of the less counter for LRU(l) and FIFO(f)
-    
+
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
-    printf("LINE1: %lu no INDEX: %d, e quer a position: %d\n", line1, index1, position_that_has_this_upper);
+    //printf("LINE1: %lu no INDEX: %d, e quer a position: %d\n", line1, index1, position_that_has_this_upper);
 
     /****************************** Write Miss ********************************/
     if (position_that_has_this_upper == -1) { // position with the right upper was not found
@@ -176,10 +181,10 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
             }
             // *** FIFO ***
             rpf = strcmp(fifo, replacement_policy);
-            if (rpf == 0) { // It's LRU
+            if (rpf == 0) { // It's FIFO
                 p_lLd = findLessLoadTSset(cache1, index1, associativity);
                 //printf("Free line: %d in the set: %d\n", p_lLd, index1);
-                
+
                 cache1->Cache_Upper[index1][p_lLd] = line1;
                 cache1->Cache_Data[index1][p_lLd] = DATA;
                 cache1->T_Access[index1][p_lLd] = currently_clk; // Update T_Access
@@ -192,12 +197,13 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
         /************************** Set isn't full /***************************/
         else {                  // There are a free block in the set (by index1)
             free_block = random_free_space_set (cache1, index1, associativity);
+
             cache1->Cache_Upper[index1][free_block] = line1;
             cache1->Cache_Data[index1][free_block] = DATA;
             cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
-            printf("tempoAcWrite hit: %lu", cache1->T_Access[index1][position_that_has_this_upper]);   
+            //printf("tempoAcWrite hit: %lu\n", cache1->T_Access[index1][position_that_has_this_upper]);
             cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
-            printf("tempoLdWrite hit: %lu", cache1->T_Load[index1][position_that_has_this_upper]); 
+            //printf("tempoLdWrite hit: %lu\n", cache1->T_Load[index1][position_that_has_this_upper]);
         }
     }
     /**************************************************************************/
@@ -210,9 +216,10 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
          *     an another data.
          */
         result1->write_hits++;
-        cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
+        cache1->Cache_Upper[index1][position_that_has_this_upper] = line1;
+        //cache1->Cache_Data[index1][position_that_has_this_upper] = DATA; // Write the "new" data in the right position at the cache memory
         cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
-        printf("tempoAcRead hit: %lu", cache1->T_Access[index1][position_that_has_this_upper]);        
+        //printf("tempoAcRead hit: %lu\n", cache1->T_Access[index1][position_that_has_this_upper]);
 
     }
 }
@@ -220,7 +227,7 @@ void write_cache (Cache *cache1, Results *result1, int index1, long unsigned lin
 int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1, int data1, int associativity, char *replacement_policy) {
     /** Reading the data in the set (by index) in the position that contains the
       *     upper (by line).
-      */   
+      */
     char *lru  = "LRU\0";
     char *fifo = "FIFO\0";
     int is_full;
@@ -230,7 +237,7 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
     int position_that_has_this_upper = getPosUpper(cache1, index1, line1, associativity);
     //printf("LINE1: %lu no INDEX: %d\n", line1, index1);
 
-    /****************************** Write Miss ********************************/
+    /****************************** Read Misses ********************************/
     if (position_that_has_this_upper == -1) { // position with the right upper was not found
         /** None position contains a line with the solicited upper.
           * The cache can be full, so it have to use a replacement policy (FIFO or LRU).
@@ -265,7 +272,7 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
             rpf = strcmp(fifo, replacement_policy);
             if (rpf == 0) { // It's LRU
                 p_lLd = findLessLoadTSset(cache1, index1, associativity);
-                printf("Free line: %d in the set: %d\n", p_lLd, index1);
+                //printf("Free line: %d in the set: %d\n", p_lLd, index1);
                 cache1->Cache_Upper[index1][p_lLd] = line1;
                 cache1->Cache_Data[index1][p_lLd] = DATA;        // MESMO COM A DUVIDA NAO DA PROBLEMA, PORQUE JA TERIA DADO ANTES
                 cache1->T_Access[index1][p_lLd] = currently_clk; // Update T_Access
@@ -278,8 +285,8 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
         /************************** Set isn't full /***************************/
         else {                  // There are a free block in the set (by index1)
             free_block = random_free_space_set (cache1, index1, associativity);
-            
-            cache1->Cache_Upper[index1][free_block] = free_block;
+
+            cache1->Cache_Upper[index1][free_block] = line1;
             cache1->Cache_Data[index1][free_block] = DATA;                              //DUVIDA AQUI
             cache1->T_Access[index1][free_block] = currently_clk; // Update the T_Access
             cache1->T_Load[index1][free_block] = currently_clk;   // Update the T_Load
@@ -295,6 +302,8 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
          *     an another data.
          */
         result1->read_hits++;
+        cache1->Cache_Upper[index1][position_that_has_this_upper] = line1;
+        cache1->Cache_Data[index1][position_that_has_this_upper] = DATA;  // Modified bit
         cache1->T_Access[index1][position_that_has_this_upper] = currently_clk; // Update the T_Access
 
     }
@@ -303,9 +312,9 @@ int read_cache (Cache *cache1, Results *result1, int index1, long unsigned line1
 /**
  * This function generates a formated output with the results of cache simulation
  */
-void generate_output(Results cache_results){
+void generate_output(Results cache_results, char *output_name){
     FILE *ptr_file_output;
-    ptr_file_output=fopen("output.out", "wb");
+    ptr_file_output=fopen(output_name, "wb");
     //char output_file[11] = "output.out";
 
     if (!ptr_file_output) {
@@ -325,7 +334,7 @@ void generate_output(Results cache_results){
 
 int main(int argc, char **argv)               // Files are passed by a parameter
 {
-    printf("\n*** Cache Simulator ***\n");
+    printf("\n*** Cache Simulator ***\n\n");
     //printf("TIME1%lld\n", (long long) time(NULL));
 
     Desc    cache_description;
@@ -340,7 +349,8 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     cache_results.write_misses = 0;
 
     char *description = argv[1];
-    char *input = argv[2];
+    char *input       = argv[2];
+    char *output_name = argv[3];
     FILE *ptr_file_specs_cache;
     FILE *ptr_file_input;
     FILE *ptr_file_output;
@@ -446,7 +456,7 @@ int main(int argc, char **argv)               // Files are passed by a parameter
             else if (RorW == 'W'){
                 line  = make_upper(address, BYTES_PER_WORD, words_per_line);
                 index = make_index (number_of_sets, line);
-                //printf("INDEXXXX: %d\n", index);
+                //printf("Index here: %d\n", index);
                 number_of_writes++;
                 write_cache(&cache_mem, &cache_results, index, line, data, cache_description.associativity, cache_description.replacement_policy);
             }
@@ -465,8 +475,30 @@ int main(int argc, char **argv)               // Files are passed by a parameter
     /**************************************************************************/
 
     /****************************** Output ************************************/
-    generate_output(cache_results);
+    generate_output(cache_results, output_name);
     /**************************************************************************/
+
+    #if CACHEVIEW == 1
+    printf("\n\nCurrently Cache\n");
+    int m, n, vazio=0;
+    for (m=0; m<number_of_sets; m++) {
+        for (n=0; n<cache_description.associativity; n++) {
+            printf("%lu ", cache_mem.Cache_Upper[m][n]);
+            if (cache_mem.Cache_Data[m][n]==0)
+                vazio++;
+        }
+        printf("\n");
+    }
+    printf ("\nNAO MODIFS: %d\n", vazio);
+
+    printf("\n\nCurrently Cache\n");
+    for (m=0; m<number_of_sets; m++) {
+        for (n=0; n<cache_description.associativity; n++) {
+            printf("%d ", cache_mem.Cache_Data[m][n]);
+        }
+        printf("\n");
+    }
+    #endif
 
     cache_mem.Cache_Data  = NULL;  // "Free" in the memory for the Cache_Data[][]
     cache_mem.Cache_Upper = NULL;  // "Free" in the memory for the Cache_Upper[][]
