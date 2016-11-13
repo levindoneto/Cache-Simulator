@@ -31,5 +31,5 @@ For access the line is used the "upper" information. Upper is used only for comp
 ## How to use
 ```Terminal
 make all
-./243685 "cachedesc.bin" "input.bin"
+./243685 "cachedescriptionfile.format" "inputfile.format" "outputfile.format"
 ```
