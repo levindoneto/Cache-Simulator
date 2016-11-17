@@ -1,4 +1,6 @@
-# Cache-Simulator
+# Cache Simulator
+
+__Author:__ Levindo Gabriel Taschetto Neto
 
 The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write back with write allocate policy. The words (blocks/lines) have 1B.
 
@@ -25,11 +27,11 @@ These informations are modeled as a array 3-D that contains the following positi
 * Set (number_of_lines / associativity)
 * Line (associativity)
 
-For to access a data in the cache, only thing that is necessary is the set, which is the information about "index" in the address.
+To access a data in the cache, only thing that is necessary is the set, which is the information about "index" in the address.
 For access the line is used the "upper" information. Upper is used only for comparisons to know which line (block) should be accessed, because the set doesn't have any particular order.
 
 ## How to use
 ```Terminal
 make all
-./243685 "cachedescriptionfile.format" "inputfile.format" "outputfile.format"
+./243685 "Tests/Cache_Descriptions/cachedescriptionfile.format" "Tests/Trace_Files/inputfile.format" "outputfile.format"
 ```
