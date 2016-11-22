@@ -1,6 +1,6 @@
 # Cache Simulator
 
-__Author:__ Levindo Gabriel Taschetto Neto
+__Author:__ Levindo Gabriel Taschetto Neto.
 
 The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write back with write allocate policy. The words (blocks/lines) have 1B.
 
@@ -20,6 +20,7 @@ The cache simulator is used to simulate substitutions using replacement policies
 ## Cache Structure
 Cache is a struct that contains three informations:
 * Data_Cache
+* Upper (Used as a tag in the set)
 * T_Access (used in the LRU algorithm)
 * T_Load (used in the LRU algorithm)
 
