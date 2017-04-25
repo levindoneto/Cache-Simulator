@@ -18,18 +18,18 @@ The cache simulator is used to simulate substitutions using replacement policies
 * Number of read misses
 
 ## Cache Structure
-Cache is a struct that contains three informations:
+Cache is a struct that contains four information:
 * Data_Cache
 * Upper (Used as a tag in the set)
 * T_Access (used in the LRU algorithm)
 * T_Load (used in the LRU algorithm)
 
-These informations are modeled as a array 3-D that contains the following positions:
+These informations are modeled as a array 2-D that contains the following positions:
 * Set (number_of_lines / associativity)
 * Line (associativity)
 
-To access a data in the cache, only thing that is necessary is the set, which is the information about "index" in the address.
-For access the line is used the "upper" information. Upper is used only for comparisons to know which line (block) should be accessed, because the set doesn't have any particular order.
+To access a data in the cache, the only thing that is necessary is the set, which is the information about "index" in the address.
+For access, the line is used the "upper" information. Upper is used only for comparisons to know which line (block) should be accessed because the set doesn't have any particular order.
 
 ## How to use
 ```Terminal
