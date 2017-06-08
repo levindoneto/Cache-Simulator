@@ -2,6 +2,8 @@
 
 __Author:__ Levindo Gabriel Taschetto Neto.
 
+[![build status](https://img.shields.io/travis/reactjs/redux/master.svg?style=flat-square)](https://travis-ci.org/reactjs/redux)
+
 The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write back with write allocate policy. The words (blocks/lines) have 1B.
 
 ## Specification file content (input)
@@ -20,19 +22,23 @@ The cache simulator is used to simulate substitutions using replacement policies
 ## Cache Structure
 Cache is a struct that contains four information:
 * Data_Cache
-* Upper (Used as a tag in the set)
+* Upper (used as a tag in the set)
 * T_Access (used in the LRU algorithm)
 * T_Load (used in the LRU algorithm)
 
-These informations are modeled as a array 2-D that contains the following positions:
+These informations are modeled as a dynamic array 2-D which contains the following positions:
 * Set (number_of_lines / associativity)
 * Line (associativity)
 
-To access a data in the cache, the only thing that is necessary is the set, which is the information about "index" in the address.
-For access, the line is used the "upper" information. Upper is used only for comparisons to know which line (block) should be accessed because the set doesn't have any particular order.
+To access a data in the cache, the only thing that is necessary is the set, which is the information about "index" in an address.
+To access the line is used an "upper" information. The upper is used only for comparisons to know which line (block) should be accessed because the set doesn't have any particular order.
 
 ## How to use
 ```Terminal
 make all
 ./243685 "Tests/Cache_Descriptions/cachedescriptionfile.format" "Tests/Trace_Files/inputfile.format" "outputfile.format"
 ```
+
+## License
+
+MIT License. Click [here](LICENSE.md) for more information about this license.
