@@ -2,8 +2,6 @@
 
 __Author:__ Levindo Gabriel Taschetto Neto.
 
-[![build status](https://img.shields.io/travis/reactjs/redux/master.svg?style=flat-square)](https://travis-ci.org/reactjs/redux)
-
 The cache simulator is used to simulate substitutions using replacement policies (FIFO and LRU) and write back with write allocate policy. The words (blocks/lines) have 1B.
 
 ## Specification file content (input)
